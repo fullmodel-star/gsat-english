@@ -3,8 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#5b6ee0">
+<meta name="theme-color" content="#0ea5a5">
 <link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="大學會考複習">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title>大學會考複習</title>
 <style>
   :root{
@@ -95,6 +101,11 @@
   .lphr{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:8px}
   .lphr b{font-size:15px}.lphr .pz{color:var(--pri);font-size:13.5px;margin-left:6px}.lphr .pu{font-size:12.8px;color:var(--soft);display:block;margin-top:3px}
   @media(max-width:430px){.units,.lgrid{grid-template-columns:1fr}}
+  #installBar:empty{display:none}
+  #installBar .ib{display:block;width:100%;border:0;border-radius:14px;padding:13px 15px;font-size:15px;font-weight:800;cursor:pointer;background:#0ea5a5;color:#fff;box-shadow:0 6px 16px rgba(14,165,165,.32)}
+  #installBar .ib.sec{background:#e2f4f0;color:#0b8080}
+  #installBar .tip{background:#fbf1dd;border:1px solid #ecd9a8;border-radius:14px;padding:13px;font-size:13px;line-height:1.85;color:#5a4a1a}
+  #installBar .x{display:inline-block;margin-top:6px;color:#0b8080;font-weight:800;cursor:pointer}
 </style>
 </head>
 <body>
@@ -107,6 +118,7 @@
     <p>學測英文 110–115 歷屆真題・完整題庫練習</p>
     <span class="src">資料：大學入學考試中心 學測英文試題</span>
   </div>
+  <div id="installBar" style="margin:12px 0"></div>
   <div class="prcat" onclick="showLecture()" style="border-left-color:#e6a53a;margin-bottom:16px" tabindex="0">
     <span class="pci">📖</span><div><h3>學測重點（先讀再練）</h3><div class="pcn">五大題型攻略・高頻難字・考點片語</div></div><span class="arrowr">›</span>
   </div>
@@ -302,6 +314,26 @@ function showLecture(){
 }
 buildCats();counts();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+/* ===== 安裝到桌面 (PWA) ===== */
+(function(){
+  var dp=null;
+  function iss(){return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;}
+  function iios(){return /iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
+  function ren(){var el=document.getElementById('installBar');if(!el)return;
+    var home=document.getElementById('s-home'),onHome=home&&home.classList.contains('on');
+    if(iss()||!onHome){el.innerHTML='';return;}
+    if(dp){el.innerHTML='<button class="ib" onclick="__inst()">📲 安裝到桌面（免開瀏覽器） ➕</button>';}
+    else if(iios()){el.innerHTML='<button class="ib sec" onclick="__instIOS()">📲 安裝到主畫面（iPad / iPhone） ›</button>';}
+    else{el.innerHTML='';}}
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;ren();});
+  window.addEventListener('appinstalled',function(){dp=null;ren();});
+  window.__inst=function(){if(!dp)return;dp.prompt();dp.userChoice.finally(function(){dp=null;ren();});};
+  window.__instIOS=function(){var el=document.getElementById('installBar');if(!el)return;el.innerHTML='<div class="tip">📲 <b>加到 iPad / iPhone 桌面：</b><br>1. 用 <b>Safari</b> 開啟本頁<br>2. 點「分享 ⬆️」<br>3. 往下找「<b>加入主畫面 ➕</b>」<br>4. 右上按「新增」完成<br><span class="x" onclick="__instClose()">知道了 ✓</span></div>';};
+  window.__instClose=function(){ren();};
+  window.__renderInstall=ren;
+  ren();
+})();
 </script>
 </body>
 </html>
