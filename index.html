@@ -8,29 +8,31 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="大學會考複習">
+<meta name="apple-mobile-web-app-title" content="學測複習">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<title>大學會考複習</title>
+<title>學測複習</title>
 <style>
   :root{
-    --pri:#5b6ee0;--pri-bg:#e8ecfb;--tea:#3aa89a;--tea-bg:#e2f4f0;--amb:#e6a53a;--amb-bg:#fbf1dd;
+    --pri:#0ea5a5;--pri-bg:#d8f0ee;--tea:#3aa89a;--tea-bg:#e2f4f0;--amb:#e6a53a;--amb-bg:#fbf1dd;
     --pur:#8b6fd0;--pur-bg:#eee8fa;--rose:#e0698e;--rose-bg:#fbe6ee;
     --ink:#33343d;--soft:#787985;--line:#ececed;--bg:#f8f8fb;--card:#fff;
     --ok:#3aa276;--ok-bg:#e2f4ec;--no:#e0698e;--no-bg:#fbe6ee;
   }
+
+  @media(prefers-color-scheme:dark){:root{--bg:#14161a;--card:#1e2127;--ink:#e7e8ec;--soft:#9a9ca4;--line:#2c2f37;--pri-bg:#0d2a2a;--tea-bg:#0d2a2a;--pur-bg:#241f2e;--amb-bg:#2a2413;--ok-bg:#14281e;--no-bg:#2a1820}.opt,.qcard,.unit,.prcat,.qbtn,.scorebox,.rev,.back,.hero,details.lc,.lword,.lphr{background:var(--card)}}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0}
   body{background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.7;font-size:16px}
-  .wrap{max-width:660px;margin:0 auto;padding:14px 14px 44px;min-height:100vh}
+  .wrap{max-width:660px;margin:0 auto;padding:14px 14px calc(44px + env(safe-area-inset-bottom));min-height:100vh}
   .screen{display:none;animation:fade .22s}.screen.on{display:block}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   @media(prefers-reduced-motion:reduce){.screen{animation:none}}
   .topbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;min-height:38px}
-  .back{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);white-space:nowrap}
+  .back{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 16px;min-height:40px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);white-space:nowrap}
   .back:hover{background:var(--pri-bg)}
   .topbar h2{font-size:18px;margin:0}.topbar .sp{margin-left:auto}
-  .hero{text-align:center;padding:26px 16px 20px;background:linear-gradient(135deg,var(--pri-bg),var(--pur-bg));border-radius:22px;border:1px solid var(--line);margin-bottom:16px}
+  .hero{text-align:center;padding:26px 16px 20px;background:linear-gradient(135deg,var(--pri-bg),var(--tea-bg));border-radius:22px;border:1px solid var(--line);margin-bottom:16px}
   .hero h1{font-size:25px;margin:0 0 4px}.hero p{margin:0;color:var(--soft);font-size:13.5px}
   .hero .src{display:inline-block;margin-top:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 13px;font-size:12px;color:var(--soft)}
   .lead{text-align:center;color:var(--soft);font-size:14.5px;margin:2px 0 10px}
@@ -51,7 +53,7 @@
   .prog{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin-bottom:4px}
   .prog>i{display:block;height:100%;background:var(--pri);width:0;transition:width .3s}
   .pmeta{display:flex;justify-content:space-between;font-size:12.5px;color:var(--soft);margin-bottom:12px}
-  .passage{background:var(--amb-bg);border:1px solid #efdcb4;border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:14.5px;line-height:1.8;max-height:48vh;overflow:auto;white-space:pre-wrap}
+  .passage{background:var(--amb-bg);border:1px solid #efdcb4;border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:14.5px;line-height:1.8;max-height:clamp(160px,44vh,420px);overflow:auto;white-space:pre-wrap}
   .passage .pg{font-size:11.5px;color:#a3781f;font-weight:800;margin-bottom:5px;position:sticky;top:0}
   .qcard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
   .qtag{display:inline-block;font-size:11px;font-weight:700;color:var(--soft);background:#f2f2f6;border-radius:6px;padding:2px 9px;margin-bottom:9px}
@@ -114,7 +116,7 @@
 <!-- 首頁 -->
 <div class="screen on" id="s-home">
   <div class="hero">
-    <h1>🎓 大學會考複習</h1>
+    <h1>🎓 學測複習</h1>
     <p>學測英文 110–115 歷屆真題・完整題庫練習</p>
     <span class="src">資料：大學入學考試中心 學測英文試題</span>
   </div>
@@ -161,7 +163,7 @@ QDATA.passages.forEach(p=>PASS[p.pid]=p);
 const UNIT=10;
 const CATS=[
   {key:'詞彙',icon:'🔤',color:'#8b6fd0'},
-  {key:'綜合測驗',icon:'🧩',color:'#5b6ee0'},
+  {key:'綜合測驗',icon:'🧩',color:'#0ea5a5'},
   {key:'文意選填',icon:'📝',color:'#3aa89a'},
   {key:'篇章結構',icon:'🧱',color:'#e6a53a'},
   {key:'閱讀測驗',icon:'📖',color:'#e0698e'},
@@ -198,7 +200,8 @@ function buildCats(){
 }
 function openCat(key){
   const us=unitsOf(key);
-  document.getElementById('unitTitle').textContent=(CATS.find(c=>c.key===key).icon)+' '+key;
+  const _c=CATS.find(c=>c.key===key);if(!_c){toast('找不到題型：'+key);return}
+  document.getElementById('unitTitle').textContent=_c.icon+' '+key;
   document.getElementById('unitLead').textContent=`完整 ${poolOf(key).length} 題，依序分成 ${us.length} 個 Unit`;
   const box=document.getElementById('unitList');box.innerHTML='';
   us.forEach((arr,i)=>{
