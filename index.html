@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1E6E8C">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="學測複習">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="ridgeline-ui.css">
+<title>學測複習</title>
+<style>
+  :root{
+    /* 稜線識別 · theme-lake（湖藍）— 主色湖藍、紙背＋岩藍墨；狀態色（綠/紅/分數）保留語意；分類色為區辨用途保留 */
+    --pri:#2E86A8;--pri-bg:#E0EAF0;--tea:#3aa89a;--tea-bg:#e2f4f0;--amb:#e6a53a;--amb-bg:#fbf1dd;
+    --pur:#8b6fd0;--pur-bg:#eee8fa;--rose:#e0698e;--rose-bg:#fbe6ee;
+    --ink:#141E2B;--soft:#6E8BA3;--line:#E4DDCE;--bg:#F7F3EC;--card:#fff;--shadow:none;
+    --ok:#3aa276;--ok-bg:#e2f4ec;--no:#e0698e;--no-bg:#fbe6ee;
+  }
+
+  @media(prefers-color-scheme:dark){:root{--bg:#141E2B;--card:#1B2838;--ink:#EEF3F6;--soft:#8FA6BC;--line:#2A3A4E;--pri-bg:#123040;--tea-bg:#0d2a2a;--pur-bg:#241f2e;--amb-bg:#2a2413;--ok-bg:#14281e;--no-bg:#2a1820;--shadow:none}.opt,.qcard,.unit,.prcat,.qbtn,.scorebox,.rev,.back,.hero,details.lc,.lword,.lphr{background:var(--card)}}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.7;font-size:16px}
+  .wrap{max-width:660px;margin:0 auto;padding:14px 14px calc(44px + env(safe-area-inset-bottom));min-height:100vh}
+  .screen{display:none;animation:fade .22s}.screen.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){.screen{animation:none}}
+  .topbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;min-height:38px}
+  .back{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 16px;min-height:40px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);white-space:nowrap}
+  .back:hover{background:var(--pri-bg)}
+  .topbar h2{font-size:18px;margin:0}.topbar .sp{margin-left:auto}
+  .hero{text-align:center;padding:26px 16px 20px;background:var(--card);border-radius:22px;border:1px solid var(--line);margin-bottom:16px}
+  .hero h1{font-size:25px;margin:0 0 4px}.hero p{margin:0;color:var(--soft);font-size:13.5px}
+  .hero .src{display:inline-block;margin-top:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 13px;font-size:12px;color:var(--soft)}
+  .lead{text-align:center;color:var(--soft);font-size:14.5px;margin:2px 0 10px}
+  .prcats{display:grid;grid-template-columns:1fr;gap:11px}
+  .prcat{display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px;cursor:pointer;border-left:6px solid var(--pri);transition:transform .12s}
+  .prcat:hover{transform:translateY(-3px);border-color:var(--pri)}
+  .prcat .pci{font-size:28px}.prcat h3{margin:0;font-size:17px}.prcat .pcn{font-size:12.5px;color:var(--soft)}
+  .prcat .arrowr{margin-left:auto;color:var(--soft);font-weight:800}
+  .quick{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:14px}
+  .qbtn{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);border-radius:15px;padding:13px 14px;cursor:pointer;font-family:inherit;font-size:15px;font-weight:700;color:var(--ink)}
+  .qbtn .qn{margin-left:auto;background:var(--pri);color:#fff;border-radius:999px;font-size:12px;font-weight:800;padding:2px 9px;min-width:24px;text-align:center}
+  .qbtn.wrong{border-left:5px solid var(--no)}.qbtn.word{border-left:5px solid var(--amb)}
+  .units{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:6px}
+  .unit{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px;cursor:pointer;position:relative}
+  .unit h4{margin:0 0 3px;font-size:16px}.unit .ur{font-size:12px;color:var(--soft)}
+  .unit .done{position:absolute;top:10px;right:12px;font-size:12px;font-weight:800;color:var(--ok)}
+  .unit.finished{border-color:#b6e6d4;background:var(--ok-bg)}
+  .prog{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin-bottom:4px}
+  .prog>i{display:block;height:100%;background:var(--pri);width:0;transition:width .3s}
+  .pmeta{display:flex;justify-content:space-between;font-size:12.5px;color:var(--soft);margin-bottom:12px}
+  .passage{background:var(--amb-bg);border:1px solid #efdcb4;border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:14.5px;line-height:1.8;max-height:clamp(160px,44vh,420px);overflow:auto;white-space:pre-wrap}
+  .passage .pg{font-size:11.5px;color:#a3781f;font-weight:800;margin-bottom:5px;position:sticky;top:0}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+  .qtag{display:inline-block;font-size:11px;font-weight:700;color:var(--soft);background:#f2f2f6;border-radius:6px;padding:2px 9px;margin-bottom:9px}
+  .stem{font-size:16.5px;line-height:1.85;margin-bottom:6px}
+  .opts{display:grid;gap:9px;margin-top:12px}
+  .opt{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1.5px solid var(--line);border-radius:13px;padding:11px 13px;cursor:pointer;font-size:15.5px;text-align:left;font-family:inherit;color:var(--ink);transition:all .12s}
+  .opt:hover{border-color:var(--pri)}
+  .opt .lab{font-weight:800;color:var(--soft);flex:0 0 auto}
+  .opt.ok{border-color:var(--ok);background:var(--ok-bg)}.opt.ok .lab{color:var(--ok)}
+  .opt.no{border-color:var(--no);background:var(--no-bg)}.opt.no .lab{color:var(--no)}
+  .opt.dis{cursor:default}
+  .word{cursor:pointer;border-radius:3px;padding:0 1px}
+  .word.marked{background:#ffe6a3;box-shadow:inset 0 -2px 0 #e6a53a}
+  .fb{margin-top:12px;border-radius:12px;padding:11px 13px;font-size:14.3px;display:none;line-height:1.7}
+  .fb.show{display:block}
+  .fb.good{background:var(--ok-bg);border:1px solid #b6e6d4}.fb.bad{background:var(--no-bg);border:1px solid #f4c4d4}
+  .fb .kp{font-weight:800;font-size:12.5px;color:var(--soft);margin-bottom:3px}
+  .btnrow{display:flex;gap:10px;margin-top:14px}
+  .btn{flex:1;border:none;border-radius:14px;padding:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit}
+  .btn.primary{background:var(--pri);color:#fff}
+  .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink);flex:0 0 auto;padding:14px 18px}
+  .scorebox{text-align:center;background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:16px}
+  .scorebox .big{font-size:42px;font-weight:900;color:var(--pri)}.scorebox .sub{color:var(--soft);font-size:14px}
+  .rev{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px}
+  .rev .rh{display:flex;gap:8px;align-items:center;font-size:14px;margin-bottom:5px}
+  .rev .mark{font-weight:900}.rev .mark.ok{color:var(--ok)}.rev .mark.no{color:var(--no)}
+  .rev .rq{font-size:15px;margin:4px 0}.rev .ra{font-size:13.5px;color:var(--soft)}
+  .rev .rex{font-size:13.8px;background:var(--pri-bg);border-radius:9px;padding:9px 11px;margin-top:7px;line-height:1.7}
+  .rev .kp{font-size:11.5px;font-weight:800;color:var(--soft);margin-bottom:3px}
+  .empty{text-align:center;color:var(--soft);padding:40px 20px;font-size:15px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:50}
+  .toast.show{opacity:.95}
+  .lsec{font-weight:800;font-size:16px;margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  details.lc{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+  details.lc>summary{list-style:none;cursor:pointer;padding:13px 15px;font-weight:700;font-size:16px;display:flex;align-items:center;gap:9px}
+  details.lc>summary::-webkit-details-marker{display:none}
+  details.lc .lci{width:30px;height:30px;border-radius:9px;background:var(--pri-bg);display:inline-flex;align-items:center;justify-content:center;font-size:16px}
+  details.lc .arw{margin-left:auto;color:var(--soft);transition:transform .2s}
+  details.lc[open] .arw{transform:rotate(90deg)}
+  .lc .lb{padding:2px 15px 15px;font-size:14.5px;line-height:1.8}
+  .lc .goq{margin-top:10px;display:inline-block;background:var(--pri);color:#fff;border:none;border-radius:999px;padding:8px 15px;font-weight:800;font-size:13.5px;cursor:pointer;font-family:inherit}
+  .lgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .lword{background:#fff;border:1px solid var(--line);border-radius:11px;padding:8px 11px}
+  .lword b{font-size:15px}.lword .wp{font-size:10.5px;color:#7183c8;font-weight:700;margin-left:4px}
+  .lword .wz{font-size:12.8px;color:var(--soft);display:block;margin-top:1px}
+  .lthm{font-weight:800;color:var(--soft);font-size:13.5px;margin:14px 0 7px}
+  .lphr{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:8px}
+  .lphr b{font-size:15px}.lphr .pz{color:var(--pri);font-size:13.5px;margin-left:6px}.lphr .pu{font-size:12.8px;color:var(--soft);display:block;margin-top:3px}
+  @media(max-width:430px){.units,.lgrid{grid-template-columns:1fr}}
+  #installBar:empty{display:none}
+  #installBar .ib{display:block;width:100%;border:0;border-radius:14px;padding:13px 15px;font-size:15px;font-weight:800;cursor:pointer;background:var(--pri);color:#fff}
+  #installBar .ib.sec{background:var(--pri-bg);color:var(--pri)}
+  #installBar .tip{background:#fbf1dd;border:1px solid #ecd9a8;border-radius:14px;padding:13px;font-size:13px;line-height:1.85;color:#5a4a1a}
+  #installBar .x{display:inline-block;margin-top:6px;color:var(--pri);font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap theme-lake">
+
+<!-- 首頁 -->
+<div class="screen on" id="s-home">
+  <header class="rl-appbar theme-lake" style="border-radius:16px;margin-bottom:14px">
+    <span class="rl-mark"><svg class="rl-glyph" viewBox="0 0 64 64" width="30" height="30" fill="none"><path d="M0 54 L8 48 L14 51 L22 38 L26 42 L36 14 L46 34 L61 44" fill="none" stroke="currentColor" stroke-width="4.4" stroke-linejoin="round" stroke-linecap="round"/><path d="M31.3 27.2 L36 14 L38.7 19.4" fill="none" stroke="#DE9A45" stroke-width="4.4" stroke-linejoin="round" stroke-linecap="round"/></svg></span>
+    <div>
+      <div class="rl-title">🎓 學測複習</div>
+      <div class="rl-sub">學測英文 110–115 · 大考中心歷屆真題</div>
+    </div>
+  </header>
+  <div id="installBar" style="margin:12px 0"></div>
+  <div class="prcat" onclick="showLecture()" style="border-left-color:#e6a53a;margin-bottom:16px" tabindex="0">
+    <span class="pci">📖</span><div><h3>學測重點（先讀再練）</h3><div class="pcn">五大題型攻略・高頻難字・考點片語</div></div><span class="arrowr">›</span>
+  </div>
+  <p class="lead">👇 或直接選題型練習（完整題庫、依序分 Unit）</p>
+  <div class="prcats" id="catList"></div>
+  <div class="quick">
+    <button class="qbtn wrong" onclick="rvWrongStart&&rvWrongStart()">❌ 錯題複習·嚴格<span class="qn" id="wrongCnt">0</span></button>
+    <button class="qbtn word" onclick="showWords()">⭐ 我的生字<span class="qn" id="wordCnt">0</span></button>
+  </div>
+  <p class="lead" style="margin-top:20px;font-size:12.5px">💡 作答時<b>點題目或文章裡的英文字</b>可加入生字複習</p>
+</div>
+
+<div class="screen" id="s-units">
+  <div class="topbar"><button class="back" onclick="go('home')">←</button><h2 id="unitTitle"></h2></div>
+  <p class="lead" id="unitLead" style="text-align:left"></p>
+  <div class="units" id="unitList"></div>
+</div>
+
+<div class="screen" id="s-quiz"></div>
+
+<div class="screen" id="s-result"></div>
+
+<div class="screen" id="s-words">
+  <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>⭐ 我的生字</h2></div>
+  <div id="wordList"></div>
+</div>
+
+<div class="screen" id="s-lecture">
+  <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>📖 學測重點</h2></div>
+  <div id="lecBody"></div>
+</div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="rv2-core.js"></script>
+<script>
+const R=QDATA.items.filter(q=>!q.skip), PASS={};
+QDATA.passages.forEach(p=>PASS[p.pid]=p);
+const UNIT=10;
+const CATS=[
+  {key:'詞彙',icon:'🔤',color:'#8b6fd0'},
+  {key:'綜合測驗',icon:'🧩',color:'#2E86A8'},
+  {key:'文意選填',icon:'📝',color:'#3aa89a'},
+  {key:'篇章結構',icon:'🧱',color:'#e6a53a'},
+  {key:'閱讀測驗',icon:'📖',color:'#e0698e'},
+];
+const LS=localStorage;
+function load(k,d){try{return JSON.parse(LS.getItem(k))||d}catch(e){return d}}
+function save(k,v){LS.setItem(k,JSON.stringify(v))}
+let wrongBook=load('gsat_wrong',{}),markedWords=load('gsat_words',{}),unitDone=load('gsat_units',{});
+const ALL={};R.forEach(q=>ALL[q.id]=q);
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1400)}
+function counts(){document.getElementById('wrongCnt').textContent=Object.keys(wrongBook).length;document.getElementById('wordCnt').textContent=Object.keys(markedWords).length}
+
+function go(s){document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('on',x.id==='s-'+s));window.scrollTo(0,0);if(s==='home'){counts();buildCats()}}
+function poolOf(key){return R.filter(q=>q.type===key).sort((a,b)=>b.year-a.year||a.no-b.no)}
+function unitsOf(key){
+  const p=poolOf(key);
+  if(key==='詞彙'){const u=[];for(let i=0;i<p.length;i+=UNIT)u.push(p.slice(i,i+UNIT));return u}
+  // 有題組的：依文章分組，不切斷
+  const groups=[],gi={};
+  p.forEach(q=>{const k=q.passageRef||q.id;if(!(k in gi)){gi[k]=groups.length;groups.push([])}groups[gi[k]].push(q)});
+  const units=[];let cur=[];
+  groups.forEach(g=>{if(cur.length&&cur.length+g.length>UNIT){units.push(cur);cur=[]}cur=cur.concat(g);if(cur.length>=UNIT){units.push(cur);cur=[]}});
+  if(cur.length)units.push(cur);return units;
+}
+function buildCats(){
+  counts();const box=document.getElementById('catList');box.innerHTML='';
+  try{ document.getElementById('wrongCnt').textContent=rvWrongCount(); }catch(e){}
+  // 📚 總複習 + 🔥 考前衝刺（RV2）
+  var doneN=Object.keys(unitDone).length;
+  var rvb=document.createElement('div');rvb.className='prcat';rvb.style.borderLeftColor='#2E86A8';
+  rvb.innerHTML='<span class="pci">📚</span><div><h3>總複習・診斷弱點</h3><div class="pcn">'+(doneN?('把已完成的 '+doneN+' 個 Unit 混合出題，測出真正還沒記牢的'):'先完成幾個 Unit 再來')+'</div></div><span class="arrowr">›</span>';
+  rvb.onclick=function(){ if(typeof rvStartReview==='function') rvStartReview(); };box.appendChild(rvb);
+  var due=0; try{ due=RV.dueCount(); }catch(e){}
+  var cram=document.createElement('div');cram.className='prcat';cram.style.borderLeftColor='#e0698e';
+  cram.innerHTML='<span class="pci">🔥</span><div><h3>考前衝刺</h3><div class="pcn">'+(due?('今天有 '+due+' 題該回來看・'):'')+'把所有錯題快速過一遍、不套隔天限制</div></div><span class="arrowr">›</span>';
+  cram.onclick=function(){ if(typeof rvCramStart==='function') rvCramStart(); };box.appendChild(cram);
+  CATS.forEach(c=>{
+    const us=unitsOf(c.key),n=poolOf(c.key).length;
+    let done=0;us.forEach((_,i)=>{if(unitDone[c.key+'#'+i])done++});
+    const d=document.createElement('div');d.className='prcat';d.style.borderLeftColor=c.color;
+    d.innerHTML=`<span class="pci">${c.icon}</span><div><h3>${c.key}</h3><div class="pcn">${n} 題・${us.length} 個 Unit${done?'　✅ '+done+'/'+us.length:''}</div></div><span class="arrowr">›</span>`;
+    d.onclick=()=>openCat(c.key);box.appendChild(d);
+  });
+}
+function openCat(key){
+  const us=unitsOf(key);
+  const _c=CATS.find(c=>c.key===key);if(!_c){toast('找不到題型：'+key);return}
+  document.getElementById('unitTitle').textContent=_c.icon+' '+key;
+  document.getElementById('unitLead').textContent=`完整 ${poolOf(key).length} 題，依序分成 ${us.length} 個 Unit`;
+  const box=document.getElementById('unitList');box.innerHTML='';
+  us.forEach((arr,i)=>{
+    const rec=unitDone[key+'#'+i];
+    const d=document.createElement('div');d.className='unit'+(rec?' finished':'');
+    d.innerHTML=`${rec?'<span class="done">✔ '+rec.score+'/'+rec.total+'</span>':''}<h4>Unit ${i+1}</h4><div class="ur">${arr[0].year}學年 起・${arr.length} 題</div>`;
+    d.onclick=()=>startUnit(key,i);box.appendChild(d);
+  });
+  go('units');
+}
+
+let Q=[],idx=0,answers=[],curKey=null,curUnit=0,curCtx='',redo=false;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function startUnit(key,ui){Q=unitsOf(key)[ui];curKey=key;curUnit=ui;redo=false;idx=0;gReveal={};answers=new Array(Q.length).fill(null);renderQ();go('quiz')}
+function startWrong(){const ids=Object.keys(wrongBook);if(!ids.length){toast('目前沒有錯題 🎉');return}Q=shuffle(ids.map(id=>ALL[id]).filter(Boolean));if(!Q.length){toast('錯題已不在題庫');return}curKey=null;redo=true;idx=0;gReveal={};answers=new Array(Q.length).fill(null);renderQ();go('quiz')}
+function optKeys(q){return q.options.map((_,i)=>String.fromCharCode(65+i))}
+function optText(q,k){return q.options[k.charCodeAt(0)-65]}
+function wordify(t){if(!t)return '';const e=(t+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');return e.replace(/([A-Za-z][A-Za-z'-]*)/g,m=>`<span class="word${markedWords[m.toLowerCase()]?' marked':''}" data-w="${m.toLowerCase()}">${m}</span>`)}
+function ctxOf(el,w){const t=el?el.textContent:'';const ss=t.split(/(?<=[.!?])\s+/);const hit=ss.find(x=>new RegExp('\\b'+w.replace(/[^a-z]/gi,'')+'\\b','i').test(x));return (hit||t).trim().slice(0,160)}
+function bindWords(root){root.querySelectorAll('.word').forEach(s=>s.addEventListener('click',e=>{e.stopPropagation();const w=s.dataset.w;
+  if(markedWords[w])delete markedWords[w];
+  else markedWords[w]={ctx:ctxOf(s.closest('.passage,.stem,.rq')||s.parentElement,w)};
+  save('gsat_words',markedWords);document.querySelectorAll('.word[data-w="'+w+'"]').forEach(x=>x.classList.toggle('marked',!!markedWords[w]));toast(markedWords[w]?'⭐ 加入生字：'+w:'移除：'+w)}))}
+const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let gReveal={};
+function grpRange(i){const pr=Q[i]&&Q[i].passageRef;if(!pr)return[i,i];let s=i,e=i;while(s>0&&Q[s-1].passageRef===pr)s--;while(e<Q.length-1&&Q[e+1].passageRef===pr)e++;return[s,e];}
+function markOne(q,k){ if(k!==q.answer){ try{RV.addWrong(q.id,'mcq',q.keyPoint||q.skill||q.type,q.type);}catch(e){} } }
+function pickG(i,k){const[gs]=grpRange(idx);const pr=Q[gs].passageRef;if(gReveal[pr])return;answers[i]=k;renderGroup();}
+function revealG(){const[gs,ge]=grpRange(idx);const pr=Q[gs].passageRef;if(gReveal[pr])return;gReveal[pr]=1;for(let i=gs;i<=ge;i++){if(answers[i]!=null)markOne(Q[i],answers[i]);}renderGroup();}
+function nextGroup(){const[,ge]=grpRange(idx);if(ge+1<Q.length){idx=ge+1;renderQ();}else finish();}
+function prevGroup(){const[gs]=grpRange(idx);if(gs>0){const[ps]=grpRange(gs-1);idx=ps;renderQ();}}
+function renderGroup(){
+  let[gs,ge]=grpRange(idx);if(idx!==gs)idx=gs;
+  const pr=Q[gs].passageRef,p=PASS[pr],rv=!!gReveal[pr];
+  let allAns=true;for(let i=gs;i<=ge;i++){if(answers[i]==null)allAns=false;}
+  let qs='',correct=0;
+  for(let i=gs;i<=ge;i++){const q=Q[i],picked=answers[i];
+    let opts='';optKeys(q).forEach(k=>{let cls='opt';if(rv){if(k===q.answer)cls+=' ok';else if(k===picked)cls+=' no';}else if(k===picked)cls+=' sel';opts+=`<button class="${cls}" data-i="${i}" data-k="${k}"${rv?' style="pointer-events:none"':''}><span class="lab">${k}</span><span>${esc(optText(q,k))}</span></button>`;});
+    let fb='';if(rv){const ok=picked===q.answer;if(ok)correct++;fb=`<div class="fb show ${ok?'good':'bad'}"><div class="kp">${ok?'✅ 答對':(picked==null?'⬜ 未作答':'❌ 答錯')}　正解：${q.answer}</div>${q.explain||'（正解如上）'}</div>`;}
+    qs+=`<div class="qcard"><span class="qtag">${q.type}</span><div class="stem">${wordify(q.stem)}</div><div class="opts">${opts}</div>${fb}</div>`;}
+  const action=rv?`<div class="fb show good"><div class="kp">📖 本篇答對 ${correct} / ${ge-gs+1} 題</div></div>`:`<button class="btn primary" id="grpChk"${allAns?'':' disabled style="opacity:.5"'} style="width:100%">✅ 對答案（整篇 ${ge-gs+1} 題）</button>`;
+  document.getElementById('s-quiz').innerHTML=`
+    <div class="topbar"><button class="back" id="qbk">←</button><h2>${curKey?curKey+' Unit '+(curUnit+1):'閱讀'}</h2><button class="back" id="qhome" style="margin-left:auto">🏠</button></div>
+    <div class="prog"><i style="width:${(ge+1)/Q.length*100}%"></i></div>
+    <div class="pmeta"><span>${gs+1}-${ge+1} / ${Q.length}</span><span>📖 讀完整篇、整組答完再對答案</span></div>
+    <div class="passage"><div class="pg">📄 ${p.type||'閱讀'}</div>${wordify(p.text)}</div>
+    ${qs}${action}
+    <div class="btnrow" id="qbtns">${gs>0?'<button class="btn ghost" id="gprev">‹ 上一篇</button>':''}<button class="btn primary" id="gnext"${rv?'':' disabled style="opacity:.5"'}>${ge+1<Q.length?'下一篇 →':'看總結'}</button></div>`;
+  const root=document.getElementById('s-quiz');bindWords(root);
+  root.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>pickG(+o.dataset.i,o.dataset.k)));
+  const chk=document.getElementById('grpChk');if(chk)chk.onclick=revealG;
+  const gn=document.getElementById('gnext');if(gn&&rv)gn.onclick=nextGroup;
+  const gp=document.getElementById('gprev');if(gp)gp.onclick=prevGroup;
+  document.getElementById('qbk').onclick=()=>{if(confirm('離開？此次作答不保存'))redo?go('home'):openCat(curKey)};
+  document.getElementById('qhome').onclick=()=>{if(confirm('回首頁？此次作答不保存'))go('home')};
+  window.scrollTo(0,0);
+}
+function renderQ(){
+  const q=Q[idx];curCtx=q.stem;
+  if(q.passageRef&&PASS[q.passageRef]&&!redo){return renderGroup();}
+  const p=q.passageRef&&PASS[q.passageRef]?PASS[q.passageRef]:null;
+  const passage=p?`<div class="passage"><div class="pg">📄 ${p.type||'閱讀'}</div>${wordify(p.text)}</div>`:'';
+  let opts='';optKeys(q).forEach(k=>{opts+=`<button class="opt" data-k="${k}"><span class="lab">${k}</span><span>${esc(optText(q,k))}</span></button>`});
+  const pw=(answers[idx]!=null?idx+1:idx)/Q.length*100;
+  document.getElementById('s-quiz').innerHTML=`
+    <div class="topbar"><button class="back" id="qbk">←</button><h2>${redo?'錯題複習':(curKey+' Unit '+(curUnit+1))}</h2><button class="back" id="qhome" style="margin-left:auto">🏠</button></div>
+    <div class="prog"><i id="pbar" style="width:${pw}%"></i></div>
+    <div class="pmeta"><span>${idx+1} / ${Q.length}</span><span>${q.year}學年 第${q.no}題・即時解析</span></div>
+    ${passage}
+    <div class="qcard"><span class="qtag">${q.type}</span><div class="stem">${wordify(q.stem)}</div>
+      <div class="opts">${opts}</div><div class="fb" id="fb"></div></div>
+    <div class="btnrow" id="qbtns"></div>`;
+  const root=document.getElementById('s-quiz');bindWords(root);
+  root.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>pick(o.dataset.k)));
+  document.getElementById('qbk').onclick=()=>{if(confirm('離開？此次作答不保存'))redo?go('home'):openCat(curKey)};
+  document.getElementById('qhome').onclick=()=>{if(confirm('回首頁？此次作答不保存'))go('home')};
+  renderBtns(false);if(answers[idx]!=null)lockUI(answers[idx]);
+  window.scrollTo(0,0);
+}
+function renderBtns(answered){const last=idx===Q.length-1;const b=document.createElement('button');b.className='btn primary';b.textContent=last?'看總結':'下一題 →';b.disabled=!answered&&answers[idx]==null;b.style.opacity=b.disabled?.5:1;b.onclick=()=>{last?finish():(idx++,renderQ())};const row=document.getElementById('qbtns');row.innerHTML='';row.appendChild(b)}
+function pick(k){
+  if(answers[idx]!=null)return;answers[idx]=k;const q=Q[idx];
+  if(k!==q.answer){ try{RV.addWrong(q.id,'mcq',q.keyPoint||q.skill||q.type,q.type);}catch(e){} } // 單一真相：只進 RV2 嚴格錯題本
+  lockUI(k);renderBtns(true);const pb=document.getElementById('pbar');if(pb)pb.style.width=((idx+1)/Q.length*100)+'%';
+}
+function lockUI(k){
+  const q=Q[idx],good=k===q.answer;
+  document.querySelectorAll('#s-quiz .opt').forEach(o=>{o.classList.add('dis');o.style.pointerEvents='none';if(o.dataset.k===q.answer)o.classList.add('ok');if(o.dataset.k===k&&!good)o.classList.add('no')});
+  const fb=document.getElementById('fb');fb.className='fb show '+(good?'good':'bad');
+  fb.innerHTML=`<div class="kp">${good?'✅ 答對了':'❌ 答錯了'}　正解：${q.answer}　考點：${q.keyPoint||q.type}</div>${q.explain||'（詳解稍後補上；正解如上）'}`;
+}
+function finish(){
+  let correct=0;Q.forEach((q,i)=>{if(answers[i]===q.answer)correct++});
+  if(!redo&&curKey){unitDone[curKey+'#'+curUnit]={score:correct,total:Q.length};save('gsat_units',unitDone)}
+  const pct=Math.round(correct/Q.length*100);
+  let h=`<div class="topbar"><button class="back" id="rbk">←</button><h2>Unit 總結</h2></div>
+    <div class="scorebox"><div class="big">${correct}/${Q.length}</div><div class="sub">答對 ${pct}%　${pct>=80?'太棒了！🎉':pct>=60?'不錯，繼續加油！💪':'多練幾次會更好 📚'}</div></div>
+    <div class="btnrow" style="margin-bottom:16px"><button class="btn ghost" id="rback">回列表</button><button class="btn primary" id="ragain">再做一次</button></div>
+    <h3 style="font-size:16px">📋 逐題檢討</h3><div id="rlist"></div>`;
+  document.getElementById('s-result').innerHTML=h;const rl=document.getElementById('rlist');
+  Q.forEach((q,i)=>{
+    const ok=answers[i]===q.answer,ua=answers[i]?optText(q,answers[i]):'（未作答）',ca=optText(q,q.answer);
+    const d=document.createElement('div');d.className='rev';
+    d.innerHTML=`<div class="rh"><span class="mark ${ok?'ok':'no'}">${ok?'✔':'✘'}</span><span>${q.year}學年 第${q.no}題</span><span class="qtag" style="margin-left:auto">${q.type}</span></div>
+      <div class="rq">${wordify(q.stem)}</div>
+      <div class="ra">你的答案：<b style="color:${ok?'var(--ok)':'var(--no)'}">${answers[i]||'—'}. ${esc(ua)}</b>${ok?'':`　｜　正解：<b style="color:var(--ok)">${q.answer}. ${esc(ca)}</b>`}</div>
+      <div class="rex"><div class="kp">考點：${q.keyPoint||q.type}</div>${q.explain||'（詳解稍後補上）'}</div>`;
+    rl.appendChild(d);
+  });
+  bindWords(document.getElementById('s-result'));
+  document.getElementById('rbk').onclick=()=>redo?go('home'):openCat(curKey);
+  document.getElementById('rback').onclick=()=>redo?go('home'):openCat(curKey);
+  document.getElementById('ragain').onclick=()=>{idx=0;answers=new Array(Q.length).fill(null);renderQ();go('quiz')};
+  go('result');counts();
+}
+function showWords(){
+  const ks=Object.keys(markedWords);const wl=document.getElementById('wordList');
+  if(!ks.length){wl.innerHTML='<div class="empty">還沒有生字 ⭐<br><br>作答時點題目或文章裡的英文字就會加進來</div>';go('words');return}
+  wl.innerHTML='';ks.forEach(w=>{const d=document.createElement('div');d.className='rev';d.innerHTML=`<div class="rh"><b style="font-size:17px">${w}</b><button class="back" data-rm="${w}" style="margin-left:auto">移除</button></div><div class="ra">例句：${esc(markedWords[w].ctx||'—')}</div>`;wl.appendChild(d)});
+  wl.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{delete markedWords[b.dataset.rm];save('gsat_words',markedWords);showWords()});
+  go('words');
+}
+const TICON={'詞彙':'🔤','綜合測驗':'🧩','文意選填':'📝','篇章結構':'🧱','閱讀測驗':'📖'};
+function showLecture(){
+  const L=QDATA.lecture;if(!L){toast('講義資料未載入');return}
+  let h='<div class="lsec">🎯 五大題型・作答攻略</div>';
+  L.strategies.forEach(s=>{
+    h+=`<details class="lc"><summary><span class="lci">${TICON[s.type]||'📘'}</span>${s.type}<span class="arw">▶</span></summary>
+      <div class="lb">${s.tip}<br><button class="goq" data-cat="${s.type}">去練「${s.type}」真題 →</button></div></details>`;
+  });
+  // 難字依主題
+  h+='<div class="lsec">🔤 高頻難字（學測詞彙題考過，'+L.hardWords.length+' 字）</div>';
+  const byT={};L.hardWords.forEach(w=>{(byT[w.theme||'其他']=byT[w.theme||'其他']||[]).push(w)});
+  const order=['描述形容','情緒態度','動作','抽象名詞','學術','其他'];
+  order.filter(t=>byT[t]).forEach(t=>{
+    h+=`<div class="lthm">・${t}（${byT[t].length}）</div><div class="lgrid">`;
+    byT[t].forEach(w=>{h+=`<div class="lword"><b>${w.word}</b><span class="wp">${w.pos||''}</span><span class="wz">${w.zh}</span></div>`});
+    h+='</div>';
+  });
+  // 片語
+  h+='<div class="lsec">🔗 綜合測驗・考點片語（'+L.phrases.length+'）</div>';
+  L.phrases.forEach(p=>{h+=`<div class="lphr"><b>${p.phrase}</b><span class="pz">${p.zh}</span>${p.use?'<span class="pu">'+p.use+'</span>':''}</div>`});
+  document.getElementById('lecBody').innerHTML=h;
+  document.querySelectorAll('#lecBody .goq').forEach(b=>b.onclick=()=>openCat(b.dataset.cat));
+  go('lecture');
+}
+buildCats();counts();
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+/* ===== 安裝到桌面 (PWA) ===== */
+(function(){
+  var dp=null;
+  function iss(){return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;}
+  function iios(){return /iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
+  function ren(){var el=document.getElementById('installBar');if(!el)return;
+    var home=document.getElementById('s-home'),onHome=home&&home.classList.contains('on');
+    if(iss()||!onHome){el.innerHTML='';return;}
+    if(dp){el.innerHTML='<button class="ib" onclick="__inst()">📲 安裝到桌面（免開瀏覽器） ➕</button>';}
+    else if(iios()){el.innerHTML='<button class="ib sec" onclick="__instIOS()">📲 安裝到主畫面（iPad / iPhone） ›</button>';}
+    else{el.innerHTML='';}}
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;ren();});
+  window.addEventListener('appinstalled',function(){dp=null;ren();});
+  window.__inst=function(){if(!dp)return;dp.prompt();dp.userChoice.finally(function(){dp=null;ren();});};
+  window.__instIOS=function(){var el=document.getElementById('installBar');if(!el)return;el.innerHTML='<div class="tip">📲 <b>加到 iPad / iPhone 桌面：</b><br>1. 用 <b>Safari</b> 開啟本頁<br>2. 點「分享 ⬆️」<br>3. 往下找「<b>加入主畫面 ➕</b>」<br>4. 右上按「新增」完成<br><span class="x" onclick="__instClose()">知道了 ✓</span></div>';};
+  window.__instClose=function(){ren();};
+  window.__renderInstall=ren;
+  ren();
+})();
+</script>
+<script>
+/* ================= RV2 整合：📚 總複習 + 嚴格錯題本（學測複習） ================= */
+var RV=new RV2().init('gsat_rv2',{ topStepOf:function(){ return 2; } });
+var RVMAP={};
+function rvKP(q){ return q.keyPoint||q.skill||q.type||'其他'; }
+function rvPassageHTML(q){ var p=q.passageRef&&PASS[q.passageRef]; return p?('<div class="passage"><div class="pg">📄 '+(p.type||'閱讀')+'</div>'+wordify(p.text)+'</div>'):''; }
+function rvPool(){ var pool=[],map={};
+  CATS.forEach(function(c){ var us=unitsOf(c.key);
+    us.forEach(function(arr,ui){ if(!unitDone[c.key+'#'+ui])return;
+      arr.forEach(function(q){ pool.push(q.id); map[q.id]={q:q,unit:rvKP(q),tag:c.key}; }); }); });
+  RVMAP=map; return pool; }
+function rvShuf(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;} return a; }
+function rvOptsHTML(q){ var ks=rvShuf(optKeys(q)),h=''; ks.forEach(function(k){ h+='<button class="opt" data-k="'+k+'"><span class="lab">'+k+'</span><span>'+esc(optText(q,k))+'</span></button>'; }); return h; }
+function rvLockOpts(sel,q,k,ok){ document.querySelectorAll(sel+' .opt').forEach(function(o){ o.style.pointerEvents='none'; if(o.dataset.k===q.answer)o.classList.add('ok'); if(o.dataset.k===k&&!ok)o.classList.add('no'); }); }
+/* 總複習 */
+var rvQ=[],rvI=0,rvRes=[],rvPicked=null;
+function rvStartReview(){ var pool=rvPool(); if(pool.length<8){ toast('先完成幾個 Unit，總複習才有題目 📚'); return; }
+  RV.startSession(); rvQ=RV.buildReview(pool, Math.min(30,pool.length)); rvI=0; rvRes=[]; rvPicked=null; rvRenderQ(); go('quiz'); }
+function rvDrill(kp){ var all=R.filter(function(q){ return rvKP(q)===kp; }); if(!all.length){ toast('這個考點沒有可補的題'); return; }
+  RVMAP={}; all.forEach(function(q){ RVMAP[q.id]={q:q,unit:rvKP(q),tag:kp}; });
+  RV.startSession(); rvQ=rvShuf(all.map(function(q){return q.id;})).slice(0,15); rvI=0; rvRes=[]; rvPicked=null; rvRenderQ(); go('quiz'); }
+function rvRenderQ(){ var id=rvQ[rvI],m=RVMAP[id],q=m.q; rvPicked=null;
+  document.getElementById('s-quiz').innerHTML=
+    '<div class="topbar"><button class="back" id="rvbk">←</button><h2>📚 總複習</h2></div>'+
+    '<div class="prog"><i style="width:'+(rvI/rvQ.length*100)+'%"></i></div>'+
+    '<div class="pmeta"><span>'+(rvI+1)+' / '+rvQ.length+'</span><span>混合題・不看單元、憑記憶作答</span></div>'+rvPassageHTML(q)+
+    '<div class="qcard"><span class="qtag">混合複習</span><div class="stem">'+wordify(q.stem)+'</div><div class="opts" id="rvopts">'+rvOptsHTML(q)+'</div><div class="fb" id="rvfb"></div></div>'+
+    '<div class="btnrow" id="rvbtns"></div>';
+  var root=document.getElementById('s-quiz'); bindWords(root);
+  root.querySelectorAll('#rvopts .opt').forEach(function(o){ o.addEventListener('click',function(){ rvPick(o.dataset.k); }); });
+  document.getElementById('rvbk').onclick=function(){ if(confirm('離開總複習？此次不保存')) go('home'); }; window.scrollTo(0,0); }
+function rvPick(k){ if(rvPicked!=null)return; rvPicked=k; var id=rvQ[rvI],m=RVMAP[id],q=m.q,ok=k===q.answer;
+  RV.recordReview(id,m.unit,ok,m.tag); RV.tickSession(); rvRes.push({id:id,unit:m.unit,tag:m.tag,ok:ok});
+  if(!ok) RV.addWrong(id,'mcq',m.unit,m.tag); RV.save();
+  rvLockOpts('#rvopts',q,k,ok);
+  var fb=document.getElementById('rvfb'); fb.className='fb show '+(ok?'good':'bad'); fb.innerHTML='<div class="kp">'+(ok?'✅ 答對':'❌ 答錯')+'　考點：'+rvKP(q)+'</div>'+(q.explain||'');
+  var last=rvI===rvQ.length-1,b=document.createElement('button'); b.className='btn primary'; b.textContent=last?'看診斷結果':'下一題 →';
+  b.onclick=function(){ if(last)rvFinishReview(); else { rvI++; rvRenderQ(); } };
+  var row=document.getElementById('rvbtns'); row.innerHTML=''; row.appendChild(b); }
+function rvFinishReview(){ var diag=RV.finishReview(rvRes);
+  var correct=rvRes.filter(function(x){return x.ok;}).length, pct=Math.round(correct/rvRes.length*100);
+  var kps={}; R.forEach(function(q){ kps[rvKP(q)]=1; }); var rc=RV.retainedCount(Object.keys(kps).length);
+  var esc2=function(s){return (s||'').replace(/'/g,'').replace(/"/g,'').replace(/</g,'');};
+  var bandTxt={master:'精熟',shaky:'待加強',weak:'不熟'},bandCol={master:'#7bd36a',shaky:'#f5c33b',weak:'#e0698e'};
+  var heat=diag.units.map(function(u){ return '<div style="background:'+bandCol[u.band]+';color:#1a1a1a;border-radius:8px;padding:6px 5px;text-align:center;font-size:11px;font-weight:800">'+esc(u.unit)+'<br>'+Math.round(u.r*100)+'%</div>'; }).join('');
+  var weak=diag.weakUnits.map(function(u){ return '<button class="btn ghost" style="display:flex;justify-content:space-between" onclick="rvDrill(\''+esc2(u.unit)+'\')">'+bandTxt[u.band]+'：'+esc(u.unit)+' ('+Math.round(u.r*100)+'%) <span>立即補 ›</span></button>'; }).join('');
+  document.getElementById('s-result').innerHTML=
+    '<div class="topbar"><button class="back" id="rvrbk">←</button><h2>📊 總複習診斷</h2></div>'+
+    '<div class="scorebox"><div class="big">'+pct+'%</div><div class="sub">'+correct+'/'+rvRes.length+' 題</div></div>'+
+    '<div class="rev" style="border-left:4px solid #2E86A8"><b>這才是考試會遇到的狀態</b><br>單元練習你可能 100%，但混合、延後、不看單元的複習只有 '+pct+'%——差距就是還沒真正記牢的。</div>'+
+    '<div class="rev"><b>已精熟 '+rc.retained+' / '+rc.total+' 個考點</b>（精熟＝延後混合複習還答得對，≠當天做完）</div>'+
+    '<h3 style="font-size:15px;margin:14px 0 6px">各考點保留率</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px">'+heat+'</div>'+
+    (weak?'<h3 style="font-size:15px;margin:14px 0 6px">先補這裡</h3><div class="btnrow" style="flex-direction:column;gap:8px">'+weak+'</div>':'')+
+    '<div class="btnrow" style="margin-top:16px"><button class="btn ghost" id="rvback">回首頁</button><button class="btn primary" id="rvagain">再一輪</button></div>';
+  document.getElementById('rvrbk').onclick=document.getElementById('rvback').onclick=function(){ go('home'); };
+  document.getElementById('rvagain').onclick=rvStartReview; go('result'); }
+/* 嚴格錯題本 + 自評閘門 + 考前衝刺 + 放生 */
+var rwSess=[],rwI=0,rwPicked=null,rwCram=false;
+function rvWrongStart(cram){ rwCram=!!cram; RV.setCram(rwCram); RV.startSession(); rwSess=RV.buildWrongSession(cram?200:40);
+  if(!rwSess.length){ toast('目前沒有要複習的錯題 🎉'); RV.setCram(false); return; } rwI=0; rwPicked=null; rvWrongRender(); go('quiz'); }
+function rvCramStart(){ rvWrongStart(true); }
+function rvWrongRender(){ if(rwI>=rwSess.length){ return rvWrongDone(); }
+  var it=rwSess[rwI],id=it.id,q=(RVMAP[id]&&RVMAP[id].q)||ALL[id]; if(!q){ rwI++; return rvWrongRender(); }
+  var w=RV.db.wrong[id],f=w.facets[it.facet],cm=RV.completeness(),stepTxt=f.step>=2?'難度 ●● 再確認':'難度 ●○ 先選對';
+  document.getElementById('s-quiz').innerHTML=
+    '<div class="topbar"><button class="back" id="rwbk">←</button><h2>❌ 錯題複習（嚴格）</h2></div>'+
+    '<div class="rev" style="border-left:4px solid #e0698e;margin-bottom:8px;display:flex;align-items:center;gap:8px"><div style="flex:1"><b>完整度 '+cm.pct+'%</b>'+(rwCram?'　🔥考前衝刺':'')+'（清除 '+cm.clearedFacets+' / '+cm.totalFacets+' 面向）<div class="prog" style="margin-top:6px"><i style="width:'+cm.pct+'%"></i></div></div><button class="back" style="font-size:12px;white-space:nowrap" onclick="rvRetire()">🗑 放生</button></div>'+
+    '<div class="pmeta"><span>'+(rwI+1)+' / '+rwSess.length+'</span><span>'+stepTxt+(w.misses>=4?'　🔥頑固題':'')+'　'+(rwCram?'衝刺模式':('畢業需跨場次 '+f.streak+'/'+w.needClears))+'</span></div>'+rvPassageHTML(q)+
+    '<div class="qcard"><span class="qtag">'+rvKP(q)+'</span><div class="stem">'+wordify(q.stem)+'</div><div class="opts" id="rwopts">'+rvOptsHTML(q)+'</div><div class="fb" id="rwfb"></div></div>'+
+    '<div class="btnrow" id="rwbtns"></div>';
+  var root=document.getElementById('s-quiz'); bindWords(root);
+  root.querySelectorAll('#rwopts .opt').forEach(function(o){ o.addEventListener('click',function(){ rvWrongPick(o.dataset.k); }); });
+  document.getElementById('rwbk').onclick=function(){ if(confirm('離開錯題複習？')) go('home'); }; window.scrollTo(0,0); }
+function rvWrongPick(k){ if(rwPicked!=null)return; rwPicked=k; var it=rwSess[rwI],id=it.id,q=(RVMAP[id]&&RVMAP[id].q)||ALL[id],ok=k===q.answer;
+  rvLockOpts('#rwopts',q,k,ok); var fb=document.getElementById('rwfb'),row=document.getElementById('rwbtns'); row.innerHTML='';
+  if(!ok){ var res=RV.gradeFacet(id,it.facet,false); RV.tickSession(); fb.className='fb show bad'; fb.innerHTML='<div class="kp">❌ '+(res.msg||'')+'</div>'+(q.explain||''); rvWrongNextBtn(); return; }
+  fb.className='fb show good'; fb.innerHTML='<div class="kp">✅ 答對了——你是「確定」還是「用刪的/猜的」？誠實選，只有「我確定」才算徹底會了</div>'+(q.explain||'');
+  var b1=document.createElement('button'); b1.className='btn primary'; b1.textContent='✅ 我確定'; b1.onclick=function(){ rvWrongConfirm(id,it,true); };
+  var b2=document.createElement('button'); b2.className='btn ghost'; b2.textContent='🤔 我用刪的/猜的'; b2.onclick=function(){ rvWrongConfirm(id,it,false); };
+  row.appendChild(b1); row.appendChild(b2); }
+function rvWrongConfirm(id,it,confident){ var res=RV.gradeFacet(id,it.facet,true,{confident:confident}); RV.tickSession();
+  var fb=document.getElementById('rwfb'); fb.innerHTML='<div class="kp">'+(res.notsure?'🤔 ':(res.graduated?'🎓 ':'✅ '))+(res.msg||'')+'</div>';
+  if(res.xp){ try{ if(window.Ninja&&Ninja.gain) Ninja.gain(res.xp,'gsat-english',{correct:1}); }catch(e){} } rvWrongNextBtn(); }
+function rvWrongNextBtn(){ var row=document.getElementById('rwbtns'); row.innerHTML=''; var b=document.createElement('button'); b.className='btn primary'; b.textContent=rwI>=rwSess.length-1?'完成':'下一題 →'; b.onclick=function(){ rwI++; rwPicked=null; rvWrongRender(); }; row.appendChild(b); }
+function rvRetire(){ var it=rwSess[rwI]; if(it){ RV.retireWrong(it.id); toast('已放生這題 🗑'); rwI++; rwPicked=null; rvWrongRender(); } }
+function rvWrongDone(){ var cm=RV.completeness();
+  document.getElementById('s-result').innerHTML=
+    '<div class="topbar"><button class="back" id="rwrbk">←</button><h2>錯題複習</h2></div>'+
+    '<div class="scorebox"><div class="big">'+cm.pct+'%</div><div class="sub">完整度：已清除 '+cm.clearedFacets+' / '+cm.totalFacets+' 面向</div></div>'+
+    '<div class="rev" style="border-left:4px solid #2E86A8">畢業要跨場次——今天答對的，間隔後再答對一次才算數，防止當場硬背矇混。</div>'+
+    '<div class="btnrow" style="margin-top:16px"><button class="btn ghost" id="rwback">回首頁</button><button class="btn primary" id="rwagain">再練一輪</button></div>';
+  document.getElementById('rwrbk').onclick=document.getElementById('rwback').onclick=function(){ go('home'); };
+  document.getElementById('rwagain').onclick=function(){ rvWrongStart(); }; go('result'); }
+function rvWrongCount(){ var n=0; Object.keys(RV.db.wrong).forEach(function(id){ if(!RV.db.wrong[id].graduated)n++; }); return n; }
+</script>
+<script>/*ENGREVIEW*/(function(){if(window.EngReview)return;
+var WK='engreview.wrong',VK='engreview.words',APP={"id": "gsat-english", "name": "學測複習"};
+function load(k){try{return JSON.parse(localStorage.getItem(k)||'{}')}catch(e){return{}}}
+function save(k,o){try{localStorage.setItem(k,JSON.stringify(o))}catch(e){}}
+function hash(s){var h=0,i;for(i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))|0}return(h>>>0).toString(36)}
+function now(){return Date.now()}
+var BOX=[0,1,3,7,16,40];
+function addWrong(r){var w=load(WK);var id=hash((r.app||APP.id)+'|'+r.stem+'|'+(r.options||[]).join('~'));var e=w[id]||{id:id,first:now(),n:0};
+ e.app=r.app||APP.id;e.appName=r.appName||APP.name;e.cat=r.cat||'其他';e.stem=r.stem;e.options=r.options;e.your=r.your;e.ans=r.ans;e.expl=r.expl||'';
+ e.box=0;e.streak=0;e.due=now();e.n=(e.n||0)+1;e.ts=now();w[id]=e;save(WK,w);}
+function graded(id,ok){var w=load(WK),e=w[id];if(!e)return;if(ok){e.streak=(e.streak||0)+1;e.box=Math.min((e.box||0)+1,BOX.length-1);if(e.streak>=2){delete w[id];save(WK,w);return;}e.due=now()+BOX[e.box]*86400000;}else{e.streak=0;e.box=0;e.due=now();}e.ts=now();w[id]=e;save(WK,w);}
+function addWord(word,zh,pos,cat){var v=load(VK),k=String(word||'').toLowerCase().trim();if(!k)return false;
+ if(!v[k]){v[k]={word:word,zh:zh||'（待查）',pos:pos||'',app:APP.id,appName:APP.name,cat:cat||'',box:0,streak:0,due:now(),ts:now()};save(VK,v);return true;}
+ else{if((!v[k].zh||v[k].zh==='（待查）')&&zh){v[k].zh=zh;save(VK,v);}return false;}}
+function setWordZh(word,zh){var v=load(VK),k=String(word).toLowerCase();if(v[k]){v[k].zh=zh;v[k].box=0;save(VK,v);}}
+function wordGraded(word,ok){var v=load(VK),k=String(word).toLowerCase(),e=v[k];if(!e)return;if(ok){e.streak=(e.streak||0)+1;e.box=Math.min((e.box||0)+1,BOX.length-1);if(e.streak>=2){e.mastered=1;}e.due=now()+BOX[e.box]*86400000;}else{e.streak=0;e.box=0;e.mastered=0;e.due=now();}save(VK,v);}
+function removeWord(word){var v=load(VK);delete v[String(word).toLowerCase()];save(VK,v);}
+function cnt(o,due){var n=0,k;for(k in o){if(!due||o[k].due<=now())n++;}return n;}
+window.EngReview={app:APP,addWrong:addWrong,graded:graded,addWord:addWord,setWordZh:setWordZh,wordGraded:wordGraded,removeWord:removeWord,
+ wrong:function(){return load(WK)},words:function(){return load(VK)},
+ wrongCount:function(d){return cnt(load(WK),d)},wordCount:function(d){return cnt(load(VK),d)}};
+})();</script>
+<script>/*ENGWC*/(function(){if(window.__engwc)return;window.__engwc=1;
+var CFG={"ns": "gsat-english", "emoji": "📗", "title": "學測複習", "theme": "#0ea5a5", "tagline": "學測重點＋真題練習", "steps": [["🧩", "分頁看重點", "上方分頁切換各類重點，附真題例句。"], ["✏️", "練習真題", "完整題庫分 Unit，答完即時看解析。"], ["🖨️", "列印／存 PDF", "右下「列印」會自動展開全部內容。"], ["📲", "安裝到桌面", "裝起來離線複習。"]], "hub": "https://fullmodel-star.github.io/english-apps/"};var K='engwc.'+CFG.ns+'.done';
+var css='.engwc-ov{position:fixed;inset:0;background:rgba(28,28,40,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);z-index:2147483000;display:none;align-items:center;justify-content:center;padding:18px}'
++'.engwc-ov.show{display:flex}'
++'.engwc-card{background:#fff;color:#2a2a33;border-radius:22px;max-width:400px;width:100%;padding:24px 22px 20px;box-shadow:0 20px 55px rgba(0,0,0,.35);max-height:88vh;overflow:auto;font-family:-apple-system,\"PingFang TC\",\"Microsoft JhengHei\",system-ui,sans-serif;animation:engwcIn .25s ease}'
++'@keyframes engwcIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}'
++'.engwc-emoji{font-size:46px;text-align:center;line-height:1}'
++'.engwc-h{text-align:center;margin:8px 0 2px;font-size:21px;font-weight:800}'
++'.engwc-sub{text-align:center;color:#7a7a86;font-size:13.5px;margin-bottom:15px;line-height:1.5}'
++'.engwc-step{display:flex;gap:11px;align-items:flex-start;background:#f7f7fa;border:1px solid #ececf0;border-radius:13px;padding:10px 12px;margin-bottom:8px}'
++'.engwc-i{font-size:21px;flex:0 0 auto;line-height:1.3}'
++'.engwc-step b{font-size:14.5px}.engwc-step>div>div{font-size:12.5px;color:#7a7a86;line-height:1.5;margin-top:1px}'
++'.engwc-start{width:100%;border:0;border-radius:14px;padding:13px;font-size:15.5px;font-weight:800;color:#fff;background:'+CFG.theme+';cursor:pointer;margin-top:8px;font-family:inherit}'
++'.engwc-help{position:fixed;left:calc(12px + env(safe-area-inset-left));bottom:calc(76px + env(safe-area-inset-bottom));z-index:2147482000;width:40px;height:40px;border-radius:50%;border:1px solid #e2e2ea;background:rgba(255,255,255,.94);color:#666;font-size:18px;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.18);padding:0}'
++'.engwc-home{position:fixed;left:calc(60px + env(safe-area-inset-left));bottom:calc(76px + env(safe-area-inset-bottom));z-index:2147482000;height:40px;border-radius:20px;border:1px solid #e2e2ea;background:rgba(255,255,255,.94);color:#555;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.18);padding:0 13px}';
+var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
+var steps=CFG.steps.map(function(s){return '<div class=\"engwc-step\"><span class=\"engwc-i\">'+s[0]+'</span><div><b>'+s[1]+'</b><div>'+s[2]+'</div></div></div>';}).join('');
+var ov=document.createElement('div');ov.className='engwc-ov';
+ov.innerHTML='<div class=\"engwc-card\"><div class=\"engwc-emoji\">'+CFG.emoji+'</div><div class=\"engwc-h\">歡迎使用 '+CFG.title+'</div><div class=\"engwc-sub\">'+CFG.tagline+'</div>'+steps+'<button class=\"engwc-start\">開始使用 ▶</button></div>';
+document.body.appendChild(ov);
+var hb=document.createElement('button');hb.className='engwc-help';hb.setAttribute('aria-label','使用說明');hb.textContent='❓';document.body.appendChild(hb);
+if(CFG.hub){var hm=document.createElement('button');hm.className='engwc-home';hm.setAttribute('aria-label','回入口');hm.innerHTML='⬅ 入口';hm.addEventListener('click',function(){window.__engHubDefault=CFG.hub;if(window.__engGoHub)window.__engGoHub();else location.href=CFG.hub;});document.body.appendChild(hm);}
+function show(){ov.classList.add('show');}function close(){ov.classList.remove('show');try{localStorage.setItem(K,'1');}catch(e){}}
+ov.querySelector('.engwc-start').addEventListener('click',close);
+ov.addEventListener('click',close);
+hb.addEventListener('click',show);
+try{if(!localStorage.getItem(K)){var __t=setTimeout(show,0);var __cancel=function(){clearTimeout(__t);document.removeEventListener('pointerdown',__cancel,true);};document.addEventListener('pointerdown',__cancel,{capture:true,once:true});}}catch(e){setTimeout(show,0);}
+})();</script>
+<script>/*REVIEWUI*/(function(){if(window.__rvc)return;window.__rvc=1;
+var R=window.EngReview;if(!R){return;}
+/* 忍者修行：跨App共用經驗錢包(同網域，灌進火影修行計畫) */
+var NINJA_APP='gsatreview';
+window.Ninja=window.Ninja||(function(){var K='ninja_xp_v1';function L(){try{return JSON.parse(localStorage.getItem(K))||{}}catch(e){return{}}}function G(){var w=L();w.xp=w.xp||0;w.bySrc=w.bySrc||{};w.correct=w.correct||0;w.units=w.units||0;w.jutsu=w.jutsu||[];w.seen=w.seen||{};return w}function P(w){w.ts=Date.now();try{localStorage.setItem(K,JSON.stringify(w))}catch(e){}}return{get:G,gain:function(n,a,o){o=o||{};var w=G();w.xp+=n;w.bySrc[a]=(w.bySrc[a]||0)+n;w.correct+=(o.correct||0);w.units+=(o.unit||0);P(w);return w},backfill:function(a,x,o){var w=G();if(w.seen[a])return w;o=o||{};w.xp+=x;w.bySrc[a]=(w.bySrc[a]||0)+x;w.correct+=(o.correct||0);w.units+=(o.unit||0);w.seen[a]=1;P(w);return w}}})();
+var MYID=R.app.id, ISHUB=(MYID==='english-hub');
+var NSMAP={"english1200": {"name": "國小1200單字", "url": "https://fullmodel-star.github.io/english1200/"}, "english2000": {"name": "國中2000單字", "url": "https://fullmodel-star.github.io/english2000/"}, "english6000": {"name": "高中6000單字", "url": "https://fullmodel-star.github.io/english6000/"}, "gsat-core": {"name": "學測必考單字", "url": "https://fullmodel-star.github.io/gsat-core/"}, "toeic-vocab": {"name": "多益單字", "url": "https://fullmodel-star.github.io/toeic-vocab/"}, "toefl-vocab": {"name": "托福單字", "url": "https://fullmodel-star.github.io/toefl-vocab/"}, "englishS": {"name": "國中英語句型", "url": "https://fullmodel-star.github.io/englishS/"}, "enghs": {"name": "高中英語文法", "url": "https://fullmodel-star.github.io/hs-grammar/"}, "english-phrases": {"name": "英語片語", "url": "https://fullmodel-star.github.io/english-phrases/"}, "cap-english": {"name": "國中會考複習", "url": "https://fullmodel-star.github.io/cap-english/"}, "gsat-english": {"name": "學測複習", "url": "https://fullmodel-star.github.io/gsat-english/"}, "cap-qbank": {"name": "會考英語題庫", "url": "https://fullmodel-star.github.io/cap-qbank/"}, "gsat-qbank": {"name": "學測英語題庫", "url": "https://fullmodel-star.github.io/gsat-qbank/"}, "travel-english": {"name": "旅遊英文", "url": "https://fullmodel-star.github.io/travel-english/"}, "family-english": {"name": "家庭生活英語", "url": "https://fullmodel-star.github.io/family-english/"}, "campus-english": {"name": "校園生活英語", "url": "https://fullmodel-star.github.io/campus-english/"}, "errand-english": {"name": "生活辦事英文", "url": "https://fullmodel-star.github.io/errand-english/"}, "social-english": {"name": "社交英文", "url": "https://fullmodel-star.github.io/social-english/"}};
+function esc(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function speak(t){try{var u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=.9;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}
+var L=['A','B','C','D','E','F'],NOW=Date.now();
+var css=''
++'.rvc-fab{position:fixed;left:calc(12px + env(safe-area-inset-left));bottom:calc(124px + env(safe-area-inset-bottom));z-index:2147482500;height:40px;border-radius:20px;border:0;background:#6d28d9;color:#fff;font-size:13.5px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(109,40,217,.4);padding:0 14px;font-family:inherit;display:none}'
++'.rvc-fab .bdg{background:#fff;color:#6d28d9;border-radius:10px;padding:0 6px;margin-left:6px;font-size:12px}'
++'.rvc-card{background:linear-gradient(135deg,#6d28d9,#9333ea);color:#fff;border-radius:20px;padding:16px 18px;margin:18px 0 6px;box-shadow:0 10px 26px rgba(109,40,217,.28)}'
++'.rvc-card h3{margin:0 0 3px;font-size:16px}.rvc-card .rvc-sub{font-size:12.5px;opacity:.92;margin-bottom:12px}'
++'.rvc-approw{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.15);border-radius:12px;padding:10px 12px;margin-bottom:8px;text-decoration:none;color:#fff}'
++'.rvc-approw .an{font-weight:800;font-size:14px}.rvc-approw .am{font-size:11.5px;opacity:.9}.rvc-approw .ag{margin-left:auto;font-weight:800;font-size:12.5px}'
++'.rvc-none{font-size:13px;opacity:.9;line-height:1.8}'
++'.rvc-ov{position:fixed;inset:0;background:rgba(20,20,32,.6);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);z-index:2147483600;display:flex;align-items:flex-end;justify-content:center}'
++'.rvc-sheet{background:#f5f7fb;color:#1e2a48;width:100%;max-width:600px;max-height:92vh;border-radius:22px 22px 0 0;overflow:auto;padding:16px 16px calc(24px + env(safe-area-inset-bottom));font-family:-apple-system,\"PingFang TC\",\"Microsoft JhengHei\",sans-serif}'
++'.rvc-hd{display:flex;align-items:center;gap:10px;position:sticky;top:0;background:#f5f7fb;padding:4px 0 10px;z-index:2}'
++'.rvc-hd h2{font-size:18px;margin:0;flex:1}.rvc-x{border:0;background:rgba(0,0,0,.06);border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer}'
++'.rvc-tab{display:flex;gap:8px;margin-bottom:10px}.rvc-tab button{flex:1;border:1.5px solid #e6ebf7;background:#fff;border-radius:11px;padding:9px;font-weight:800;font-size:13.5px;cursor:pointer;font-family:inherit}.rvc-tab button.on{background:#6d28d9;color:#fff;border-color:transparent}'
++'.rvc-grp{font-weight:800;font-size:13px;color:#666;margin:12px 2px 6px}'
++'.rvc-item{background:#fff;border:1px solid #e6ebf7;border-radius:13px;padding:11px 13px;margin-bottom:9px}'
++'.rvc-q{font-weight:600;font-size:14.5px;line-height:1.5}'
++'.rvc-opt{border:1.5px solid #e6ebf7;border-radius:11px;padding:9px 12px;margin-top:7px;cursor:pointer;font-size:14.5px;display:flex;gap:8px;background:#fff}'
++'.rvc-opt .lb{font-weight:800;color:#888}.rvc-opt.ok{background:#e7f8ee;border-color:#37b36b}.rvc-opt.no{background:#fdecec;border-color:#e15656}'
++'.rvc-exp{background:#f0f5ff;border-left:3px solid #4f6ef7;border-radius:8px;padding:9px 11px;margin-top:8px;font-size:13px;line-height:1.6}'
++'.rvc-word{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e6ebf7;border-radius:12px;padding:10px 12px;margin-bottom:8px}'
++'.rvc-word .w{font-weight:800;font-size:15.5px}.rvc-word .z{font-size:13.5px;color:#666}.rvc-word .src{font-size:10.5px;color:#9aa;margin-left:auto;white-space:nowrap}'
++'.rvc-ic{border:0;background:#eef2ff;border-radius:9px;width:34px;height:34px;font-size:16px;cursor:pointer;flex:0 0 auto}'
++'.rvc-primary{width:100%;border:0;border-radius:14px;padding:14px;font-size:15.5px;font-weight:800;color:#fff;background:#6d28d9;cursor:pointer;margin:8px 0;font-family:inherit}'
++'.rvc-flash{background:#fff;border:1px solid #e6ebf7;border-radius:18px;padding:34px 18px;text-align:center;margin:10px 0;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.06)}'
++'.rvc-flash .fw{font-size:30px;font-weight:800}.rvc-flash .fz{font-size:20px;margin-top:12px;color:#6d28d9}'
++'.rvc-grade{display:grid;grid-template-columns:1fr 1fr;gap:10px}.rvc-grade button{border:0;border-radius:13px;padding:13px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}'
++'.rvc-bad{background:#fdecec;color:#c0392b}.rvc-good{background:#e7f8ee;color:#1e8e4e}'
++'.rvc-empty{text-align:center;color:#888;padding:26px;font-size:14px;line-height:1.9}';
+var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
+
+function ownWrong(){var w=R.wrong(),o=[];for(var k in w){if(w[k].app===MYID)o.push(w[k]);}return o;}
+function ownWords(){var v=R.words(),o=[];for(var k in v){if(v[k].app===MYID)o.push(v[k]);}return o;}
+function due(a){return a.filter(function(x){return x.due<=NOW;});}
+
+function ov(title,inner){var o=document.createElement('div');o.className='rvc-ov';
+  o.innerHTML='<div class=\"rvc-sheet\"><div class=\"rvc-hd\"><h2>'+title+'</h2><button class=\"rvc-x\">✕</button></div><div class=\"rvc-body\">'+inner+'</div></div>';
+  o.addEventListener('click',function(e){if(e.target===o)o.remove();});
+  o.querySelector('.rvc-x').addEventListener('click',function(){o.remove();refreshFab();});
+  document.body.appendChild(o);return o;}
+
+/* ===== 一般 App：只複習自己的 ===== */
+function refreshFab(){var fab=document.getElementById('rvcFab');if(!fab)return;
+  var dw=due(ownWrong()).length, dv=due(ownWords()).length, tot=dw+dv;
+  if(tot>0){fab.style.display='inline-flex';fab.innerHTML='📝 複習<span class=\"bdg\">'+tot+'</span>';}else{fab.style.display='none';}}
+function openSelf(){
+  var W=ownWrong(),V=ownWords();
+  var h='<div class=\"rvc-tab\"><button class=\"on\" data-t=\"w\">📕 錯題 '+W.length+'</button><button data-t=\"v\">📘 生字 '+V.length+'</button></div><div id=\"rvcPane\"></div>';
+  var o=ov('📝 我的複習',h);
+  var pane=o.querySelector('#rvcPane');
+  o.querySelectorAll('.rvc-tab button').forEach(function(b){b.addEventListener('click',function(){o.querySelectorAll('.rvc-tab button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');paint(b.dataset.t);});});
+  function paint(t){if(t==='v')paintWords(pane,V,o);else paintWrong(pane,W,o);}
+  paint('w');
+}
+function paintWrong(pane,W,o){
+  if(!W.length){pane.innerHTML='<div class=\"rvc-empty\">目前沒有錯題 🎉<br>練習答錯的題目會自動收進這裡。</div>';return;}
+  var d=due(W);
+  var grp={};W.forEach(function(e){(grp[e.cat||'其他']=grp[e.cat||'其他']||[]).push(e);});
+  var h='<button class=\"rvc-primary\" '+(d.length?'':'disabled style=opacity:.5')+' id=\"rvcQz\">▶ 重考待複習錯題（'+d.length+'）</button>';
+  Object.keys(grp).forEach(function(g){h+='<div class=\"rvc-grp\">'+esc(g)+'（'+grp[g].length+'）</div>';
+    grp[g].forEach(function(e){h+='<div class=\"rvc-item\"><div class=\"rvc-q\">'+esc(e.stem)+'</div><div class=\"rvc-exp\"><b>✅ 正解 '+L[e.ans]+'：</b>'+esc((e.options||[])[e.ans]||'')+'　'+esc(e.expl||'')+'</div></div>';});});
+  pane.innerHTML=h;
+  var qz=pane.querySelector('#rvcQz');if(qz&&d.length)qz.addEventListener('click',function(){startQuiz(d,o);});
+}
+function startQuiz(pool,parent){
+  parent.remove();var i=0,right=0;var o=ov('📕 重考錯題（'+pool.length+'）','<div id=\"rvcQ\"></div>');
+  function draw(){var box=o.querySelector('#rvcQ');if(i>=pool.length){box.innerHTML='<div class=\"rvc-empty\">複習完成！答對 '+right+'/'+pool.length+'<br>連對 2 次的題目會自動畢業 🎓</div><button class=\"rvc-primary\">完成</button>';box.querySelector('button').addEventListener('click',function(){o.remove();refreshFab();});return;}
+    var e=pool[i];var h='<div class=\"rvc-item\"><div class=\"rvc-q\">'+(i+1)+'. '+esc(e.stem)+'</div>';
+    (e.options||[]).forEach(function(op,oi){h+='<div class=\"rvc-opt\" data-i=\"'+oi+'\"><span class=\"lb\">'+L[oi]+'</span><span>'+esc(op)+'</span></div>';});
+    h+='<div id=\"rvcFb\"></div></div>';box.innerHTML=h;
+    box.querySelectorAll('.rvc-opt').forEach(function(el){el.addEventListener('click',function(){
+      if(box.dataset.done)return;box.dataset.done='1';var pick=+el.dataset.i,ok=pick===e.ans;
+      box.querySelectorAll('.rvc-opt').forEach(function(x){var xi=+x.dataset.i;if(xi===e.ans)x.classList.add('ok');else if(xi===pick)x.classList.add('no');});
+      R.graded(e.id,ok);if(ok){right++;if(!e._nx){e._nx=1;Ninja.gain(10,NINJA_APP,{correct:1});}}
+      box.querySelector('#rvcFb').innerHTML='<div class=\"rvc-exp\"><b>'+(ok?'✅ 答對':'❌ 答錯')+'・正解 '+L[e.ans]+'：</b>'+esc(e.expl||'')+'</div><button class=\"rvc-primary\">下一題 ▶</button>';
+      box.querySelector('#rvcFb button').addEventListener('click',function(){i++;delete box.dataset.done;draw();});
+    });});}
+  draw();
+}
+function paintWords(pane,V,o){
+  if(!V.length){pane.innerHTML='<div class=\"rvc-empty\">還沒有生字 📖<br>閱讀或做題時點不會的單字，就會收進這裡。</div>';return;}
+  var h='<button class=\"rvc-primary\" id=\"rvcFl\">🃏 翻卡複習（'+V.length+'）</button>';
+  V.forEach(function(e,idx){h+='<div class=\"rvc-word\"><div><div class=\"w\">'+esc(e.word)+' <span style=\"font-size:11px;color:#9aa\">'+esc(e.pos||'')+'</span></div><div class=\"z\">'+esc(e.zh)+'</div></div><span class=\"src\">'+esc(e.cat||'')+'</span>'
+    +'<button class=\"rvc-ic\" data-say=\"'+esc(e.word)+'\">🔊</button>'
+    +((!e.zh||e.zh==='（待查）')?'<button class=\"rvc-ic\" data-fill=\"'+esc(e.word)+'\">✏️</button>':'')
+    +'<button class=\"rvc-ic\" data-del=\"'+esc(e.word)+'\">🗑️</button></div>';});
+  pane.innerHTML=h;
+  pane.querySelector('#rvcFl').addEventListener('click',function(){startFlash(V,o);});
+  pane.querySelectorAll('[data-say]').forEach(function(b){b.addEventListener('click',function(){speak(b.dataset.say);});});
+  pane.querySelectorAll('[data-fill]').forEach(function(b){b.addEventListener('click',function(){var w=b.dataset.fill,zh=prompt('輸入「'+w+'」的中文意思：');if(zh&&zh.trim()){R.setWordZh(w,zh.trim());o.remove();openSelf();}});});
+  pane.querySelectorAll('[data-del]').forEach(function(b){b.addEventListener('click',function(){if(confirm('移除生字「'+b.dataset.del+'」？')){R.removeWord(b.dataset.del);o.remove();openSelf();}});});
+}
+function startFlash(V,parent){
+  parent.remove();var i=0;var o=ov('🃏 生字翻卡','<div id=\"rvcF\"></div>');
+  function draw(){var box=o.querySelector('#rvcF');if(i>=V.length){box.innerHTML='<div class=\"rvc-empty\">複習完成！👏</div><button class=\"rvc-primary\">完成</button>';box.querySelector('button').addEventListener('click',function(){o.remove();refreshFab();});return;}
+    var e=V[i];box.innerHTML='<div class=\"rvc-flash\" id=\"cf\"><div class=\"fw\">'+esc(e.word)+'</div><div style=\"font-size:12px;color:#9aa;margin-top:6px\">點卡片看中文・🔊</div></div>';
+    var flip=false,cf=box.querySelector('#cf');
+    cf.addEventListener('click',function(){if(!flip){flip=true;cf.innerHTML='<div class=\"fw\">'+esc(e.word)+'</div><div class=\"fz\">'+esc(e.zh)+'</div>';speak(e.word);
+      var g=document.createElement('div');g.className='rvc-grade';g.innerHTML='<button class=\"rvc-bad\">還不熟</button><button class=\"rvc-good\">記得了</button>';box.appendChild(g);
+      g.children[0].addEventListener('click',function(){R.wordGraded(e.word,false);i++;draw();});
+      g.children[1].addEventListener('click',function(){R.wordGraded(e.word,true);i++;draw();});
+    }else speak(e.word);});}
+  draw();
+}
+function mountSelf(){var fab=document.createElement('button');fab.id='rvcFab';fab.className='rvc-fab';fab.addEventListener('click',openSelf);document.body.appendChild(fab);refreshFab();}
+
+/* ===== Hub：只總覽 ===== */
+function mountOverview(){
+  var host=document.getElementById('dash');var card=document.createElement('div');card.className='rvc-card';card.id='rvcCard';
+  if(host&&host.parentNode)host.parentNode.insertBefore(card,host.nextSibling);else document.body.insertBefore(card,document.body.firstChild);
+  var w=R.wrong(),v=R.words();var per={};
+  function acc(id,kind){if(!NSMAP[id])return;per[id]=per[id]||{w:0,v:0};per[id][kind]++;}
+  for(var k in w){if(w[k].due<=NOW)acc(w[k].app,'w');}
+  for(var k2 in v){if(v[k2].due<=NOW)acc(v[k2].app,'v');}
+  var ids=Object.keys(per);
+  var h='<h3>📝 我的複習</h3>';
+  if(!ids.length){h+='<div class=\"rvc-none\">目前沒有待複習的錯題或生字 🎉<br>去各 App 練習，答錯的題目、閱讀點的生字，會分別留在<b>那支 App</b> 裡等你複習。</div>';}
+  else{h+='<div class=\"rvc-sub\">點進該 App 複習自己的錯題與生字（各程度分開，不混在一起）</div>';
+    ids.forEach(function(id){var m=NSMAP[id],p=per[id];h+='<a class=\"rvc-approw\" href=\"'+m.url+'\"><div><div class=\"an\">'+esc(m.name)+'</div><div class=\"am\">'+(p.w?'錯題 '+p.w+' 題':'')+(p.w&&p.v?'・':'')+(p.v?'生字 '+p.v+' 個':'')+'</div></div><span class=\"ag\">去複習 ▶</span></a>';});}
+  card.innerHTML=h;
+}
+
+if(ISHUB){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountOverview);else mountOverview();}
+else{if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountSelf);else mountSelf();}
+})();</script>
+<!-- 版本更新提示（家族共用模組 fam-update v1）-->
+<script>
+(function(){
+  if(!('serviceWorker' in navigator)||window.__famUpd)return; window.__famUpd=1;
+  var reg=null, shown=false, refreshing=false, watched=false;
+  function mkBanner(){
+    if(document.getElementById('famUpdateBanner'))return;
+    var b=document.createElement('div'); b.id='famUpdateBanner';
+    b.setAttribute('style','position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:2147483000;max-width:520px;margin:0 auto;background:linear-gradient(135deg,#16a34a,#0d9488);color:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 8px 26px rgba(16,163,74,.45);display:flex;align-items:center;gap:10px;font:600 14px/1.4 system-ui,-apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif');
+    b.innerHTML='<div style="flex:1"><b>🎉 有新版本可用</b><br><span style="font-size:12.5px;font-weight:400;opacity:.95">點「立即更新」套用最新版</span></div><button id="famUpdGo" style="background:#fff;color:#0d9488;border:0;border-radius:10px;padding:8px 15px;font:800 13.5px system-ui,sans-serif;cursor:pointer">立即更新</button><button id="famUpdX" aria-label="close" style="background:rgba(255,255,255,.22);border:0;color:#fff;width:30px;height:30px;border-radius:8px;font-size:15px;cursor:pointer">✕</button>';
+    (document.body||document.documentElement).appendChild(b);
+    document.getElementById('famUpdX').onclick=function(){b.remove()};
+    document.getElementById('famUpdGo').onclick=function(){
+      var w=reg&&reg.waiting;
+      if(w){['SKIP_WAITING','skipWaiting',{type:'SKIP_WAITING'}].forEach(function(m){try{w.postMessage(m)}catch(e){}});b.remove();setTimeout(function(){if(!refreshing){refreshing=true;location.reload();}},1800);}
+      else location.reload();
+    };
+  }
+  function show(){if(shown)return;shown=true;mkBanner();}
+  function watch(r){
+    if(!r||watched)return; watched=true; reg=r;
+    if(r.waiting&&navigator.serviceWorker.controller)show();
+    r.addEventListener('updatefound',function(){var nw=r.installing;if(!nw)return;
+      nw.addEventListener('statechange',function(){if(nw.state==='installed'&&navigator.serviceWorker.controller)show();});});
+    try{setInterval(function(){r.update().catch(function(){});},30*60*1000);}catch(e){}
+  }
+  navigator.serviceWorker.getRegistration().then(watch).catch(function(){});
+  navigator.serviceWorker.ready.then(watch).catch(function(){});
+  navigator.serviceWorker.addEventListener('controllerchange',function(){if(refreshing)return;refreshing=true;location.reload();});
+})();
+</script>
+<!--RIDGELINE_BRAND_START--><!-- 稜線識別 v3：頁尾簽名改用文件流中的 rl-signature 頁尾。原 rdgFoot 已移除。 -->
+<footer class="rl-signature theme-lake" style="padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))">
+  <div class="rl-sig-row">
+    <span class="rl-mkcol" style="display:inline-flex;flex-direction:column;align-items:center;gap:3px"><svg class="rl-sig-glyph" viewBox="0 0 64 64" width="66" height="34" fill="none"><path d="M0 54 L8 48 L14 51 L22 38 L26 42 L36 14 L46 34 L61 44" fill="none" stroke="currentColor" stroke-width="4.4" stroke-linejoin="round" stroke-linecap="round"/><path d="M31.3 27.2 L36 14 L38.7 19.4" fill="none" stroke="#DE9A45" stroke-width="4.4" stroke-linejoin="round" stroke-linecap="round"/></svg><span style="font-family:'Noto Serif TC',serif;font-size:14px;font-weight:600;letter-spacing:.5px;color:currentColor">Mt. Everest</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;color:#8794a3">8,849 M</span></span>
+    <span class="rl-sig-rule" style="height:88px"></span>
+    <p class="rl-sig-quote">多學一句英文，<br>世界就近一點。</p>
+  </div>
+  <p class="rl-sig-by">Ridgeline · by Lucas</p>
+  <p style="font-size:11px;line-height:1.7;color:var(--muted);max-width:640px;margin:14px auto 0">© 2026 Lucas　本 App 免費提供學習使用；程式與內容著作權皆屬作者，未經同意請勿重製、散布或作商業用途。<br>⚠️ 免責聲明：本 App 之題目、解析僅供學習參考，力求正確但仍可能有誤，且不代表任何官方立場；正式考試請以大學入學考試中心公告與教材為準。與各官方機構、出版社均無隸屬或合作關係，所引用之名稱與商標歸原權利人所有。</p>
+</footer>
+
+<script>/*ENG_SYNC_MODULE_V2*/
+window.__ENG_APP="gsat-english";window.__ENG_LABEL="學測複習";
+window.__ENG_SUMMARY=function(){
+  var P=function(k){try{return JSON.parse(localStorage.getItem(k)||'{}')}catch(e){return{}}};
+  var U=P('gsat_units'), W=P('gsat_wrong');
+  var done=Object.keys(U).length, sc=0, tt=0;
+  Object.keys(U).forEach(function(k){ sc+=(U[k]&&U[k].score)||0; tt+=(U[k]&&U[k].total)||0; });
+  var acc = tt? Math.round(sc/tt*100) : null;
+  var total=0; try{ total=(QDATA.items||[]).filter(function(q){return !q.skip}).length; }catch(e){}
+  return {pct: acc, pctLabel:'練習正確率',
+    streak: null,
+    metrics:[{k:'完成單元',v:done},{k:'待清錯題',v:Object.keys(W).length},{k:'題庫題數',v:total||'—'}]};
+};
+(function(){
+  var APP=window.__ENG_APP||'app', LABEL=window.__ENG_LABEL||document.title;
+  var K={url:'eng_sync_url',key:'eng_sync_key',child:'eng_child'};
+  function G(k){ try{return localStorage.getItem(k)||''}catch(e){return ''} }
+  function cfg(){ return {url:G(K.url), key:G(K.key), child:G(K.child)}; }
+  function ready(){ var c=cfg(); return !!(c.url&&c.child); }
+  try{
+    var m=(location.hash||'').match(/sync=(.+)$/);
+    if(m){
+      var p=m[1].split('~').map(function(s){try{return decodeURIComponent(s)}catch(e){return s}});
+      if(p[0]) localStorage.setItem(K.url,p[0].replace(/\/+$/,''));
+      if(p[1]) localStorage.setItem(K.key,p[1]);
+      if(p[2]) localStorage.setItem(K.child,p[2]);
+      try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+      setTimeout(function(){ alert('✅ 家長後台已設定：這台是「'+(p[2]||'')+'」的裝置，之後所有英語 App 都會自動回報進度。'); },300);
+    }
+  }catch(e){}
+  function report(){ try{ return window.__ENG_SUMMARY()||{}; }catch(e){ return {}; } }
+  var t=null;
+  function push(beacon){
+    var c=cfg(); if(!c.url||!c.child) return;
+    var r=report();
+    var body=JSON.stringify({child:c.child, app:APP, label:LABEL, key:c.key, ts:Date.now(),
+      pct:(r.pct===undefined?null:r.pct), pctLabel:r.pctLabel||'進度',
+      streak:(r.streak===undefined?null:r.streak), metrics:r.metrics||[]});
+    var url=c.url+'/report';
+    try{
+      if(beacon && navigator.sendBeacon){ navigator.sendBeacon(url, new Blob([body],{type:'text/plain'})); return; }
+      fetch(url,{method:'POST',headers:{'Content-Type':'text/plain'},body:body,keepalive:true})
+        .then(function(){setDot(true)}).catch(function(){setDot(false)});
+    }catch(e){}
+  }
+  function schedule(){ if(!ready()) return; if(t) clearTimeout(t); t=setTimeout(function(){push(false)},6000); }
+  try{
+    var _si=Storage.prototype.setItem;
+    Storage.prototype.setItem=function(k,v){
+      var r=_si.apply(this,arguments);
+      try{ var s=String(k); if(s!=='eng_sync_url'&&s!=='eng_sync_key'&&s!=='eng_child') schedule(); }catch(e){}
+      return r;
+    };
+  }catch(e){}
+  window.addEventListener('pagehide',function(){ if(ready()) push(true); });
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden'&&ready()) push(true); });
+  function setDot(ok){ var d=document.getElementById('engSyncDot'); if(d) d.style.background=ok?'#2eb872':'#e8504f'; }
+  window.engSyncNow=function(){ push(false); };
+  window.engSync={push:push,cfg:cfg,report:report};
+  setTimeout(function(){
+    if(!ready()) return;
+    if(document.getElementById('engSyncBadge')) return;
+    var c=cfg();
+    var b=document.createElement('div'); b.id='engSyncBadge';
+    b.style.cssText='position:fixed;left:8px;bottom:calc(var(--nav-h,60px) + env(safe-area-inset-bottom) + 8px);z-index:60;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:3px 9px;border-radius:999px;display:flex;align-items:center;gap:5px;cursor:pointer';
+    b.innerHTML='<span id="engSyncDot" style="width:8px;height:8px;border-radius:50%;background:#2eb872;display:inline-block"></span>☁️ '+c.child;
+    b.title='點我立即同步'; b.onclick=function(){ engSyncNow(); };
+    document.body.appendChild(b);
+    push(false);
+  }, 900);
+})();
+</script>
+
+
+
+<!--RIDGELINE_BRAND_END-->
+
+
+<script>/*HUBBACK*/(function(){if(window.__hubback)return;window.__hubback=1;
+var OK=["https://fullmodel-star.github.io/english-hub/","https://fullmodel-star.github.io/english-apps/"];   /* 白名單：擋開放導向 */
+var K='eng.hub.origin';
+function ok(u){for(var i=0;i<OK.length;i++)if(OK[i]===u)return u;return null;}
+function remember(){
+  try{
+    var q=new URLSearchParams(location.search).get('hub');
+    var v=q&&ok(q);
+    if(v){localStorage.setItem(K,v);return v;}
+    /* 沒帶 query 也試 referrer：使用者可能是從 hub 的舊書籤／自己打的連結進來的 */
+    if(document.referrer){var r=ok(new URL(document.referrer).origin+new URL(document.referrer).pathname);
+      if(r){localStorage.setItem(K,r);return r;}}
+    return ok(localStorage.getItem(K)||'');
+  }catch(e){return null;}
+}
+var hub=remember();
+window.__engHub=function(){
+  /* 記住的優先；沒有才退回 App 內寫死的 CFG.hub（維持拆兩層時的預設分流） */
+  try{return hub||window.__engHubDefault||null;}catch(e){return window.__engHubDefault||null;}
+};
+window.__engGoHub=function(){
+  var u=window.__engHub(); if(!u)return;
+  /* 家庭 hub 是 iframe srcdoc → 一定要跳到最上層，否則只是在鎖裡面再疊一層 */
+  try{ (window.top||window).location.href=u; }catch(e){ location.href=u; }
+};
+/* 網址列把 ?hub= 收乾淨，小朋友分享連結時不會把入口資訊帶出去，重整也不會殘留 */
+try{ if(new URLSearchParams(location.search).get('hub')&&history.replaceState){
+  var u=new URL(location.href);u.searchParams.delete('hub');
+  history.replaceState(null,'',u.pathname+(u.search==='?'?'':u.search)+u.hash);} }catch(e){}
+})();</script>
+</body>
+</html>
