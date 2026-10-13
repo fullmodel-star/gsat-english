@@ -1,0 +1,89 @@
+/* 活潑層 engine：gsat（906 學測複習：單頁 .screen 切換＋題型清單＋題組）
+   來源：packages/lively/engines/gsat.css → 906 的 lively-engine.css
+   判斷（2026-10-03）：
+   - 舊主色（湖藍 --pri #2E86A8）＝按鈕、進度條、分數、數字徽章 → 收進主色系（--lv-*）。
+   - 五大題型識別色（詞彙紫／綜合測驗湖藍／文意選填青／篇章結構琥珀／閱讀測驗玫瑰）＝題型分類辨識用，
+     保留色相但左邊細條壓成淡色；其中「綜合測驗」原本就用舊主色，改成淡湖藍以免和新主色（青）撞色。
+   - 「總複習」那條原本也是舊主色，不是分類 → 收進主色系；「考前衝刺」玫瑰、「學測重點」琥珀保留為淡色條。
+   - 結果色（對／錯）→ 家族語意色；文章底（琥珀淡底）＝功能區隔，保留但改用暖陽語意色。
+   - 品牌層（.rl-appbar 山形與 App 名、.rl-signature）不動。 */
+
+/* ---------- App 變數接到色票（html 與 body；specificity 高過 App 的 :root，含系統深色） ---------- */
+html:not([data-lv-x]),html:not([data-lv-x]) body{
+  --bg:var(--lv-paper); --card:var(--lv-card); --line:var(--lv-line); --ink:var(--lv-text); --soft:var(--lv-muted);
+  --pri:var(--lv-acc); --pri-bg:var(--lv-soft);
+  --amb:#E2B25E; --amb-bg:var(--lv-sun-soft);
+  --ok:var(--lv-ok); --ok-bg:var(--lv-ok-soft); --no:var(--lv-no); --no-bg:var(--lv-no-soft);
+  --shadow:0 0 0 1px var(--lv-line),0 4px 14px rgba(60,50,30,.05);
+}
+@media (prefers-color-scheme:dark){html:not([data-theme]),html:not([data-theme]) body{
+  --amb:#8A6A2E; --shadow:0 0 0 1px var(--lv-line);
+}}
+html,body{background:var(--lv-paper)}
+
+/* 數字用圓體 */
+.scorebox .big,.unit h4,.pmeta,.qbtn .qn{font-family:"LvNum",-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+
+/* ---------- 白卡（原本寫死 #fff） ---------- */
+.hero,.hero .src,.prcat,.qbtn,.unit,.qcard,.opt,.scorebox,.rev,.back,.btn.ghost,details.lc,.lword,.lphr{background:var(--lv-card)}
+.prcat,.qcard,.scorebox,details.lc{box-shadow:var(--shadow);border-color:transparent}
+.qtag{background:var(--lv-paper);color:var(--lv-muted)}
+.toast{background:var(--lv-text);color:var(--lv-paper)}
+
+/* ---------- 首頁：題型清單（左側細條＝題型識別色，壓淡） ---------- */
+.prcat{border-radius:18px;border-left-width:6px}
+.prcat:hover{box-shadow:0 0 0 2px var(--lv-soft2),0 6px 16px rgba(60,50,30,.07)}
+.prcat[style*="139, 111, 208"]{border-left-color:#BBA8E8!important}                 /* 詞彙 */
+.prcat[style*="46, 134, 168"]{border-left-color:#97BEDD!important}                  /* 綜合測驗 */
+#catList>.prcat:first-child{border-left-color:var(--lv-btn)!important}             /* 總複習（功能，非分類） */
+.prcat[style*="58, 168, 154"]{border-left-color:#8ED2C7!important}                  /* 文意選填 */
+.prcat[style*="230, 165, 58"],.prcat[style*="#e6a53a"]{border-left-color:#EDC680!important} /* 篇章結構、學測重點 */
+.prcat[style*="224, 105, 142"]{border-left-color:#EEA6BC!important}                 /* 閱讀測驗、考前衝刺 */
+.qbtn{border-radius:16px;box-shadow:0 3px 0 var(--lv-line);border-color:var(--lv-line)}
+.qbtn .qn{background:var(--lv-btn);color:var(--lv-ink)}
+.qbtn.wrong{border-left-color:var(--lv-no-line)}
+.qbtn.word{border-left-color:var(--amb)}
+
+/* ---------- 按鈕：中淺色底＋深色字、有厚度 ---------- */
+.btn.primary{background:var(--lv-btn);color:var(--lv-ink);box-shadow:0 4px 0 var(--lv-btn-d);border-radius:16px;transition:transform .08s,box-shadow .08s}
+.btn.primary:not(:disabled):active{transform:translateY(3px);box-shadow:0 1px 0 var(--lv-btn-d)}
+.btn.ghost{border-color:var(--lv-line);box-shadow:0 4px 0 var(--lv-line);border-radius:16px}
+.back{box-shadow:0 2px 0 var(--lv-line)}
+.back:hover{background:var(--lv-soft)}
+.lc .goq{background:var(--lv-btn);color:var(--lv-ink);box-shadow:0 3px 0 var(--lv-btn-d)}
+#installBar .ib{background:var(--lv-btn);color:var(--lv-ink);box-shadow:0 4px 0 var(--lv-btn-d)}
+#installBar .ib.sec{background:var(--lv-soft);color:var(--lv-acc);box-shadow:0 0 0 1.5px var(--lv-soft2),0 4px 0 var(--lv-soft2)}
+#installBar .x{color:var(--lv-acc)}
+
+/* ---------- 單元、進度、文章 ---------- */
+.unit{border-radius:16px;box-shadow:0 3px 0 var(--lv-line)}
+.unit.finished{border-color:var(--lv-ok-line);background:var(--lv-ok-soft)}
+.unit .done{color:var(--lv-ok)}
+.prog{background:var(--lv-line)}
+.prog>i{background:var(--lv-btn)}
+.passage{background:var(--lv-sun-soft);border-color:var(--lv-line)}
+.passage .pg{color:var(--lv-sun);background:var(--lv-sun-soft)}
+.scorebox .big{color:var(--lv-acc)}
+.word.marked{background:#FFE7A0;box-shadow:inset 0 -2px 0 #E2B25E;color:#2A2114}
+
+/* ---------- 作答：答對綠、答錯珊瑚紅 ---------- */
+.opt{box-shadow:0 3px 0 var(--lv-line)}
+.opt:hover{border-color:var(--lv-soft2)}
+.opt.sel{border-color:var(--lv-btn);background:var(--lv-soft)}
+.opt.ok{border-color:var(--lv-ok-line);background:var(--lv-ok-soft);color:var(--lv-ok);box-shadow:0 3px 0 var(--lv-ok-line)}
+.opt.ok .lab{color:var(--lv-ok)}
+.opt.no{border-color:var(--lv-no-line);background:var(--lv-no-soft);color:var(--lv-no);box-shadow:0 3px 0 var(--lv-no-line)}
+.opt.no .lab{color:var(--lv-no)}
+.fb.good{background:var(--lv-ok-soft);border-color:var(--lv-ok-line)}
+.fb.bad{background:var(--lv-no-soft);border-color:var(--lv-no-line)}
+.fb.good .kp{color:var(--lv-ok)}
+.fb.bad .kp{color:var(--lv-no)}
+.rev .mark.ok{color:var(--lv-ok)} .rev .mark.no{color:var(--lv-no)}
+.rev .rex{background:var(--lv-soft)}
+.rev .rex .kp{color:var(--lv-acc)}
+
+/* ---------- 講義 ---------- */
+details.lc .lci{background:var(--lv-soft)}
+.lword .wp{color:var(--lv-acc)}
+.lphr .pz{color:var(--lv-acc)}
+.lsec{border-bottom-color:var(--lv-soft2)}
